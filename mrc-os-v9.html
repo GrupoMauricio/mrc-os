@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>MRC OS</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:'DM Sans',system-ui,sans-serif;background:#09090F;color:#EEEAF8;overflow:hidden}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#252535;border-radius:4px}
+
+/* ── KEYFRAMES ── */
+@keyframes in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes glow{0%,100%{box-shadow:0 0 0 0 var(--a-20)}60%{box-shadow:0 0 0 8px transparent}}
+@keyframes spin{to{transform:rotate(360deg)}}
+.fade{animation:in .22s ease both}
+.blink{animation:pulse 1.4s ease-in-out infinite}
+
+/* ── LAYOUT ── */
+#wrap{display:flex;flex-direction:column;height:100vh}
+#top{height:46px;display:flex;align-items:center;gap:12px;padding:0 18px;border-bottom:1px solid var(--border);background:var(--surf);flex-shrink:0;transition:border-color .4s,background .4s}
+#body{display:flex;flex:1;overflow:hidden}
+#side{width:216px;min-width:216px;display:flex;flex-direction:column;border-right:1px solid var(--border);background:var(--surf);transition:all .25s;flex-shrink:0}
+#side.col{width:52px;min-width:52px}
+#main{flex:1;overflow-y:auto;overflow-x:hidden}
+.page-wrap{padding:26px 30px;max-width:940px}
+
+/* ── CSS VARS (default = neutral) ── */
+:root{
+  --a:#7C3AED;--a-10:rgba(124,58,237,.10);--a-20:rgba(124,58,237,.20);--a-40:rgba(124,58,237,.40);
+  --bg:#09090F;--surf:#0D0D16;--card:#131320;--card2:#181828;--border:rgba(255,255,255,.07);
+  --txt:rgba(255,255,255,1);--txt2:rgba(255,255,255,.55);--txt3:rgba(255,255,255,.25);
+}
+
+/* ── SIDEBAR ── */
+.s-logo{padding:12px 11px;display:flex;align-items:center;gap:9px;border-bottom:1px solid var(--border);flex-shrink:0;overflow:hidden}
+.s-mark{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.s-name{font-size:13px;font-weight:800;white-space:nowrap;line-height:1.1}
+.s-ver{font-size:9px;color:var(--txt3);font-family:'JetBrains Mono',monospace}
+.nav-wrap{flex:1;overflow-y:auto;padding:8px 6px;display:flex;flex-direction:column;gap:1px}
+.ns{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--txt3);padding:10px 8px 4px;white-space:nowrap;overflow:hidden}
+.ni{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:8px;cursor:pointer;border:none;background:transparent;color:var(--txt3);width:100%;text-align:left;transition:background .14s,color .14s;white-space:nowrap;overflow:hidden;font-family:inherit;font-size:12px;font-weight:500}
+.ni:hover{background:rgba(255,255,255,.05);color:var(--txt2)}
+.ni.on{background:var(--a-10);color:var(--a)}
+.ni-ico{font-size:14px;width:20px;text-align:center;flex-shrink:0}
+.ni-lbl{flex:1}
+.ni-tag{font-size:9px;font-weight:700;padding:2px 5px;border-radius:4px;background:rgba(255,255,255,.07);font-family:'JetBrains Mono',monospace;flex-shrink:0}
+.ni-dot{width:5px;height:5px;border-radius:50%;background:#EF4444;flex-shrink:0}
+.s-foot{padding:8px 6px;border-top:1px solid var(--border);flex-shrink:0}
+.col-btn{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:8px;cursor:pointer;border:none;background:transparent;color:var(--txt3);width:100%;font-family:inherit;font-size:12px;transition:all .14s}
+.col-btn:hover{background:rgba(255,255,255,.05);color:var(--txt2)}
+
+/* ── TOPBAR ── */
+.t-ctx{display:flex;align-items:center;gap:7px}
+.t-dot{width:7px;height:7px;border-radius:50%;background:var(--a);box-shadow:0 0 10px var(--a);flex-shrink:0;transition:all .4s}
+.t-lbl{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;letter-spacing:.05em;color:var(--a);transition:color .4s}
+.t-sp{flex:1}
+.t-alert{display:flex;align-items:center;gap:6px;padding:3px 10px 3px 8px;border-radius:20px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:#EF4444;font-size:10px;font-weight:700;cursor:pointer}
+.t-timer{display:flex;align-items:center;gap:7px;padding:3px 11px 3px 9px;border-radius:20px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25)}
+.t-xp{background:rgba(168,85,247,.1);border:1px solid rgba(168,85,247,.2);border-radius:20px;padding:3px 10px;font-size:10px;font-weight:700;color:#A855F7;font-family:'JetBrains Mono',monospace}
+.t-clock{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:4px 12px}
+.t-hm{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:700;line-height:1}
+.t-sec{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--txt3);line-height:1}
+.t-date{font-size:9px;color:var(--txt3);text-transform:capitalize;margin-top:1px}
+
+/* ── CARDS ── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px}
+.card-s{padding:14px}
+.card-accent{border-left:3px solid var(--a)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+
+/* ── TYPE ── */
+.pg-title{font-size:22px;font-weight:800;margin-bottom:3px}
+.label{font-size:9px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--txt3);margin-bottom:6px}
+.label-a{color:var(--a)}
+.dim{color:var(--txt2);font-size:12px}
+.dim-sm{color:var(--txt3);font-size:11px}
+.mono{font-family:'JetBrains Mono',monospace}
+
+/* ── BAR ── */
+.bar{height:5px;background:rgba(255,255,255,.07);border-radius:99px;overflow:hidden}
+.bar-h{height:8px}
+.bar-f{height:100%;border-radius:99px;transition:width .6s ease}
+
+/* ── PILL ── */
+.pill{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;font-family:'JetBrains Mono',monospace}
+
+/* ── STATUS LIGHT ── */
+.light{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.green{background:#16A854;box-shadow:0 0 6px rgba(22,168,84,.5)}
+.yellow{background:#E8A820;box-shadow:0 0 6px rgba(232,168,32,.5)}
+.red{background:#EF4444;box-shadow:0 0 6px rgba(239,68,68,.5)}
+.gray{background:rgba(255,255,255,.2)}
+
+/* ── INPUT ── */
+.inp{background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:7px;color:var(--txt);font-family:'DM Sans',sans-serif;font-size:12px;padding:7px 10px;outline:none;width:100%;transition:border-color .15s}
+.inp:focus{border-color:var(--a)}
+.inp::placeholder{color:var(--txt3)}
+select.inp{cursor:pointer}
+.fin-n{background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:6px;color:var(--txt);font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;padding:5px 8px;width:110px;outline:none;text-align:right;transition:border-color .15s}
+.fin-n:focus{border-color:var(--a)}
+
+/* ── BTN ── */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:8px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:600;font-size:12px;transition:all .15s}
+.btn-a{color:#09090F}
+.btn-g{background:rgba(255,255,255,.07);color:var(--txt2)}
+.btn-g:hover{background:rgba(255,255,255,.12);color:var(--txt)}
+.btn-sm{padding:4px 10px;font-size:11px}
+
+/* ── TASK ── */
+.task{display:flex;gap:0;background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:7px;transition:border-color .2s}
+.task:hover{border-color:rgba(255,255,255,.14)}
+.task.blocked{opacity:.45}
+.task.done{opacity:.38}
+.t-bar{width:3px;flex-shrink:0}
+.t-body{flex:1;padding:10px 12px}
+.t-name{font-size:13px;font-weight:600;line-height:1.3}
+.t-meta{display:flex;gap:6px;margin-top:5px;flex-wrap:wrap;align-items:center}
+.chk{width:17px;height:17px;border-radius:4px;border:1.5px solid rgba(255,255,255,.2);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;font-weight:800;color:transparent;transition:all .18s;user-select:none;margin-top:1px}
+.chk.on{color:white}
+.lock-icon{font-size:11px;color:var(--txt3);flex-shrink:0}
+
+/* ── PIPELINE ── */
+.pipe-col{flex:1;min-width:0}
+.pipe-hd{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:8px 12px;border-radius:8px 8px 0 0;border:1px solid var(--border);border-bottom:none}
+.pipe-body{border:1px solid var(--border);border-radius:0 0 8px 8px;padding:10px;min-height:80px;display:flex;flex-direction:column;gap:6px}
+.pipe-item{padding:9px 11px;border-radius:7px;border:1px solid var(--border);font-size:12px;font-weight:500;cursor:pointer;transition:all .15s;background:var(--card2)}
+.pipe-item:hover{border-color:rgba(255,255,255,.18)}
+.pipe-item.locked{opacity:.4;cursor:default}
+.pipe-empty{font-size:11px;color:var(--txt3);text-align:center;padding:12px 0}
+
+/* ── DELIVERY ── */
+.del{display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid var(--border)}
+.del:last-child{border-bottom:none}
+.urg{font-size:9px;padding:2px 6px;border-radius:10px;background:rgba(239,68,68,.12);color:#EF4444;border:1px solid rgba(239,68,68,.25);font-weight:700;flex-shrink:0}
+
+/* ── EXTRA ── */
+.extra{display:flex;align-items:flex-start;gap:9px;padding:9px 11px;background:var(--card2);border-radius:8px;border:1px solid var(--border);margin-bottom:6px}
+.add-form{display:none;background:var(--card2);border-radius:9px;padding:12px;margin-bottom:10px;border:1px solid var(--border)}
+
+/* ── HEALTH CARD ── */
+.biz-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.biz-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--a);opacity:.6}
+.biz-card:hover{border-color:rgba(255,255,255,.15);transform:translateY(-1px)}
+.biz-card.biz-green::before{background:#16A854}
+.biz-card.biz-yellow::before{background:#E8A820}
+.biz-card.biz-red::before{background:#EF4444}
+.biz-card.biz-gray::before{background:rgba(255,255,255,.2)}
+
+/* ── STAT BLOCK ── */
+.stat{background:var(--card2);border-radius:9px;padding:12px}
+.stat-v{font-size:22px;font-weight:800;line-height:1;margin-bottom:2px}
+.stat-l{font-size:10px;color:var(--txt3);font-weight:500}
+
+/* ── NEXT ACTION ── */
+.next-action{background:var(--a-10);border:1px solid var(--a-20);border-radius:11px;padding:14px 16px;margin-bottom:12px}
+
+/* ── SAT RING ── */
+.sat-wrap{display:flex;flex-direction:column;align-items:center;gap:4px}
+
+/* ── TOGGLE ── */
+.tog{display:flex;background:var(--card2);border-radius:8px;padding:3px;gap:2px;margin-bottom:14px}
+.tog-btn{flex:1;padding:5px 10px;border-radius:6px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;background:transparent;color:var(--txt3);transition:all .15s}
+.tog-btn.on{background:var(--card);color:var(--txt);box-shadow:0 1px 3px rgba(0,0,0,.3)}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <div id="top">
+    <div class="t-ctx">
+      <div class="t-dot" id="t-dot"></div>
+      <span class="t-lbl" id="t-lbl">Central</span>
+    </div>
+    <div id="t-alert"></div>
+    <div class="t-sp"></div>
+    <div id="t-timer" style="display:none" class="t-timer">
+      <div class="blink" style="width:5px;height:5px;border-radius:50%;background:#EF4444"></div>
+      <span class="mono" style="font-size:13px;font-weight:700;color:#EF4444" id="t-timer-disp">00:00</span>
+      <span id="t-timer-lbl" style="font-size:10px;color:var(--txt3);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
+      <button onclick="timerStop()" style="background:none;border:none;color:#EF4444;cursor:pointer;font-size:11px;padding:0 0 0 3px;opacity:.7">⏹</button>
+    </div>
+    <div class="t-xp" id="t-xp">⚡ 0</div>
+    <div class="t-clock">
+      <div style="display:flex;align-items:baseline;gap:2px">
+        <span class="t-hm" id="t-hm">--:--</span>
+        <span class="t-sec" id="t-sec">:--</span>
+      </div>
+      <div class="t-date" id="t-date"></div>
+    </div>
+  </div>
+  <div id="body">
+    <div id="side">
+      <div class="s-logo">
+        <div class="s-mark" id="s-mark">⚡</div>
+        <div id="s-txt">
+          <div class="s-name">MRC OS</div>
+          <div class="s-ver">v9 · 2025</div>
+        </div>
+      </div>
+      <div class="nav-wrap" id="nav-wrap">
+        <button class="ni on" data-p="home" onclick="go('home')"><span class="ni-ico">⚡</span><span class="ni-lbl">Central</span></button>
+        <div class="ns" id="ns1">Meus Negócios</div>
+        <button class="ni" data-p="nextlevel"   onclick="go('nextlevel')"  ><span class="ni-ico">🟡</span><span class="ni-lbl">NextLevel</span>     <span class="ni-dot"></span><span class="ni-tag" id="nb-nl" style="color:#E8A820">3</span></button>
+        <button class="ni" data-p="brasdigital" onclick="go('brasdigital')"><span class="ni-ico">🟠</span><span class="ni-lbl">Brás Digital</span> <span class="ni-tag" id="nb-bd">base</span></button>
+        <button class="ni" data-p="mauriciocrm" onclick="go('mauriciocrm')"><span class="ni-ico">🔵</span><span class="ni-lbl">MauricioCRM</span>  <span class="ni-tag" id="nb-crm">SaaS</span></button>
+        <button class="ni" data-p="megatron"    onclick="go('megatron')"  ><span class="ni-ico">🔴</span><span class="ni-lbl">Mega Tron</span>     <span class="ni-dot"></span><span class="ni-tag" id="nb-mt" style="color:#EF4444">ML</span></button>
+        <button class="ni" data-p="mentorias"   onclick="go('mentorias')" ><span class="ni-ico">🟣</span><span class="ni-lbl">Mentorias</span>     <span class="ni-tag" id="nb-men">lançar</span></button>
+        <button class="ni" data-p="amazonia"    onclick="go('amazonia')"  ><span class="ni-ico">🌎</span><span class="ni-lbl">AmazonIA+IDESA</span><span class="ni-tag" id="nb-az">plano</span></button>
+        <div class="ns" id="ns2">Clientes</div>
+        <button class="ni" data-p="alphaoutfit" onclick="go('alphaoutfit')"><span class="ni-ico">👕</span><span class="ni-lbl">Alpha Outfit</span> <span class="ni-tag" id="nb-ao">—</span></button>
+        <button class="ni" data-p="viitss"      onclick="go('viitss')"    ><span class="ni-ico">🎽</span><span class="ni-lbl">ViiTss</span>        <span class="ni-tag" id="nb-vt">—</span></button>
+        <button class="ni" data-p="cusimodas"   onclick="go('cusimodas')" ><span class="ni-ico">👔</span><span class="ni-lbl">Cusi Modas</span>    <span class="ni-tag" id="nb-cm">—</span></button>
+        <div class="ns" id="ns3">Ferramentas</div>
+        <button class="ni" data-p="timer"  onclick="go('timer')" ><span class="ni-ico">⏱</span><span class="ni-lbl">Cronômetro</span><span class="ni-tag" id="nb-tmr" style="display:none;color:#EF4444">●</span></button>
+        <button class="ni" data-p="config" onclick="go('config')"><span class="ni-ico">⚙️</span><span class="ni-lbl">Config</span></button>
+      </div>
+      <div class="s-foot">
+        <div style="padding:0 8px 8px" id="s-xp-wrap">
+          <div style="font-size:9px;color:var(--a);font-weight:700;margin-bottom:4px;font-family:'JetBrains Mono',monospace" id="s-lvl">Fundador Solo</div>
+          <div class="bar"><div class="bar-f" id="s-xp-bar" style="background:var(--a);width:0%"></div></div>
+          <div style="font-size:9px;color:var(--txt3);margin-top:3px;font-family:'JetBrains Mono',monospace" id="s-xp-txt">0 XP</div>
+        </div>
+        <button class="col-btn" onclick="colSide()">
+          <span style="font-size:13px;width:20px;text-align:center" id="col-ico">←</span>
+          <span id="col-lbl">Recolher</span>
+        </button>
+      </div>
+    </div>
+    <div id="main"></div>
+  </div>
+</div>
+
+<script>
+/* ════════════════════════════════════════════════════════════
+   DATA
+════════════════════════════════════════════════════════════ */
+const THEMES={
+  home:       {a:'#7C3AED',r:'124,58,237',  bg:'#09090F',s:'#0D0D16',c:'#131320',lbl:'Central'},
+  nextlevel:  {a:'#E8A820',r:'232,168,32',  bg:'#0F0C02',s:'#131005',c:'#1C1908',lbl:'NextLevel'},
+  brasdigital:{a:'#F97316',r:'249,115,22',  bg:'#100901',s:'#151005',c:'#1C1208',lbl:'Brás Digital'},
+  mauriciocrm:{a:'#3B82F6',r:'59,130,246',  bg:'#02080F',s:'#050C14',c:'#091018',lbl:'MauricioCRM'},
+  megatron:   {a:'#EF4444',r:'239,68,68',   bg:'#100202',s:'#150505',c:'#1C0808',lbl:'Mega Tron'},
+  mentorias:  {a:'#A855F7',r:'168,85,247',  bg:'#08020F',s:'#0D0516',c:'#12091C',lbl:'Mentorias'},
+  amazonia:   {a:'#16A854',r:'22,168,84',   bg:'#020F04',s:'#05140A',c:'#091C0E',lbl:'AmazonIA+IDESA'},
+  alphaoutfit:{a:'#06B6D4',r:'6,182,212',   bg:'#020C0F',s:'#051014',c:'#091518',lbl:'Alpha Outfit'},
+  viitss:     {a:'#EC4899',r:'236,72,153',  bg:'#100208',s:'#150510',c:'#1C0915',lbl:'ViiTss'},
+  cusimodas:  {a:'#10B981',r:'16,185,129',  bg:'#020F07',s:'#05140A',c:'#091C0E',lbl:'Cusi Modas'},
+  timer:      {a:'#EF4444',r:'239,68,68',   bg:'#09090F',s:'#0D0D16',c:'#131320',lbl:'Cronômetro'},
+  config:     {a:'#6B7280',r:'107,114,128', bg:'#09090F',s:'#0D0D16',c:'#131320',lbl:'Config'},
+};
+
+const MOTD=[
+  'Você está construindo algo que ninguém mais está construindo no Brasil.',
+  'ViiTss: R$600k/mês no TikTok Shop. Esse é o seu portfólio.',
+  'Cada R$299 do CRM é recorrente. Foca em volume.',
+  'O perfil pessoal do Mauricio desbloqueia tudo de uma vez.',
+  'Brás Digital: 900 seguidores esperando. Falta o conteúdo.',
+  'IDESA tem 23 anos de credencial. Ninguém tem isso.',
+  'Gravar PT e dublar EN com IA = produtividade de 3 pessoas.',
+  'Consultar uma vez = R$1.500. Contratar = R$2.800/mês.',
+];
+
+/* NEGÓCIOS */
+const BIZ={
+  nextlevel:{
+    id:'nextlevel', name:'NextLevel Agência', icon:'🟡', theme:'nextlevel',
+    blocker:'Sem site e sem redes sociais — impede rodar os R$500 em ads',
+    metrics:[
+      {l:'Clientes Ativos',v:'3',unit:'',color:'#E8A820'},
+      {l:'Receita Mensal',v:'R$3.689',unit:'fixo',color:'#16A854'},
+      {l:'Ads Investidos',v:'R$500',unit:'/mês',color:'#EF4444'},
+    ],
+    pipe:{
+      'Fazer agora':[
+        {id:'nl1',t:'Criar perfil pessoal Mauricio — Instagram + LinkedIn',req:null,impact:'Desbloqueia mentorias e NextLevel'},
+        {id:'nl2',t:'Criar Instagram NextLevel Agência',req:'nl1',impact:'Pré-requisito para ads'},
+        {id:'nl3',t:'Criar site NextLevel em Framer (1 página)',req:'nl2',impact:'Destino dos anúncios'},
+      ],
+      'Em construção':[
+        {id:'nl4',t:'Rodar R$500 em Meta Ads para agência',req:'nl3',impact:'+1 cliente = payback em 6 dias'},
+        {id:'nl5',t:'Lançar turma Mentoria TikTok Shop (8 vagas)',req:'nl1',impact:'+R$28.000 na turma'},
+      ],
+      'Próximo mês':[
+        {id:'nl6',t:'Registrar domínio nextlevelmarketing.com.br',req:null,impact:'R$40/ano'},
+        {id:'nl7',t:'Day of Content como oferta de entrada (R$2.500)',req:'nl1',impact:'Converte em contrato mensal'},
+      ],
+    },
+    digital:{
+      instagram:{status:'criar',url:''},
+      tiktok:{status:'não precisa',url:''},
+      linkedin:{status:'criar',url:''},
+      site:{status:'criar',url:'',plat:'Framer'},
+    },
+  },
+  brasdigital:{
+    id:'brasdigital', name:'Brás Digital', icon:'🟠', theme:'brasdigital',
+    blocker:'Splits e comissões não definidos — sem isso não dá para onboar fornecedores',
+    metrics:[
+      {l:'Fornecedores Piloto',v:'0',unit:'/ 5 meta',color:'#F97316'},
+      {l:'Seguidores Instagram',v:'900',unit:'(bagunçado)',color:'#E8A820'},
+      {l:'Plataforma',v:'Wbuy Pay',unit:'configurado',color:'#16A854'},
+    ],
+    pipe:{
+      'Fazer agora':[
+        {id:'bd1',t:'Definir splits e comissões (varejo/atacado/dropship)',req:null,impact:'Desbloqueia onboarding dos 5 fornecedores'},
+        {id:'bd2',t:'Reorganizar Instagram @brasdigital (900 seguidores)',req:null,impact:'900 pessoas esperando conteúdo'},
+        {id:'bd3',t:'Registrar brasdigital.com.br e chinahub.com.br',req:null,impact:'R$40 cada · urgente'},
+      ],
+      'Em construção':[
+        {id:'bd4',t:'Onboar 5 fornecedores chineses piloto',req:'bd1',impact:'Fase 1 do marketplace'},
+        {id:'bd5',t:'Catálogo profissional dos primeiros produtos',req:'bd4',impact:'Sem catálogo não há venda'},
+        {id:'bd6',t:'Criar TikTok e YouTube Brás Digital',req:'bd2',impact:'Canal de aquisição de compradores'},
+      ],
+      'Próximo mês':[
+        {id:'bd7',t:'Campanha de lançamento com influenciadores',req:'bd5',impact:'Datas duplas e promoções'},
+        {id:'bd8',t:'Onboar 10 fornecedores adicionais',req:'bd5',impact:'Escala da Fase 2'},
+      ],
+    },
+    digital:{
+      instagram:{status:'reorganizar',url:'@brasdigital'},
+      tiktok:{status:'criar',url:''},
+      youtube:{status:'criar',url:''},
+      site:{status:'Wbuy marketplace',url:'brasdigital.com.br',plat:'Wbuy'},
+    },
+  },
+  mauriciocrm:{
+    id:'mauriciocrm', name:'MauricioCRM', icon:'🔵', theme:'mauriciocrm',
+    blocker:'Sem landing page de vendas — impossível vender o produto para novos clientes',
+    metrics:[
+      {l:'Clientes Pagantes',v:'1',unit:'Alpha Outfit',color:'#3B82F6'},
+      {l:'MRR',v:'R$189',unit:'/mês',color:'#16A854'},
+      {l:'Potencial',v:'R$299',unit:'× clientes',color:'#A855F7'},
+    ],
+    pipe:{
+      'Fazer agora':[
+        {id:'crm1',t:'Incluir MauricioCRM no contrato ViiTss (mês 4)',req:null,impact:'+R$299/mês imediato'},
+        {id:'crm2',t:'Incluir MauricioCRM no contrato Cusi Modas',req:null,impact:'+R$299/mês imediato'},
+        {id:'crm3',t:'Criar landing page mauriciocrm.com.br em Framer',req:null,impact:'Domínio já existe — só criar o site'},
+      ],
+      'Em construção':[
+        {id:'crm4',t:'Atualizar Alpha Outfit de R$189 para R$299',req:'crm3',impact:'+R$110/mês · cliente já usa'},
+        {id:'crm5',t:'Criar tutoriais em vídeo das funcionalidades',req:null,impact:'Reduz suporte + vende o produto'},
+      ],
+      'Próximo mês':[
+        {id:'crm6',t:'Oferecer plano anual com desconto (R$2.690)',req:'crm3',impact:'Receita antecipada + retenção'},
+        {id:'crm7',t:'Meta: 10 clientes pagantes',req:'crm3',impact:'R$2.990/mês recorrente'},
+      ],
+    },
+    digital:{
+      site:{status:'criar',url:'mauriciocrm.com.br',plat:'Framer'},
+      linkedin:{status:'criar',url:''},
+      instagram:{status:'criar',url:''},
+    },
+  },
+  megatron:{
+    id:'megatron', name:'Mega Tron / ML', icon:'🔴', theme:'megatron',
+    blocker:'Sem anúncios criados no Mercado Livre — perde benefícios do Projeto Polos',
+    metrics:[
+      {l:'Projeto Polos',v:'Aprovado',unit:'R$3k/mês em ADS',color:'#EF4444'},
+      {l:'Anúncios ML',v:'0',unit:'/ 5 necessários',color:'#E8A820'},
+      {l:'Nicho',v:'Brinquedos',unit:'11,5% ML fee',color:'#F97316'},
+    ],
+    pipe:{
+      'Fazer agora':[
+        {id:'mt1',t:'Criar 5 anúncios de brinquedos no ML (estoque Brinca Brinca)',req:null,impact:'Libera consultoria Projeto Polos'},
+        {id:'mt2',t:'Otimizar títulos com palavras-chave do ML',req:'mt1',impact:'Visibilidade orgânica no algoritmo'},
+        {id:'mt3',t:'Configurar Full Logístico ML',req:'mt1',impact:'Entrega mais rápida = mais vendas'},
+      ],
+      'Em construção':[
+        {id:'mt4',t:'Usar R$3.000/mês de ADS do Projeto Polos',req:'mt1',impact:'Visibilidade paga nos anúncios'},
+        {id:'mt5',t:'Expandir catálogo para 20+ produtos',req:'mt2',impact:'Mais SKUs = mais receita'},
+      ],
+      'Próximo mês':[
+        {id:'mt6',t:'Criar Instagram Mega Tron Brasil',req:null,impact:'Presença de marca'},
+        {id:'mt7',t:'Conectar estoque Brás Digital ↔ Mega Tron ML',req:'mt5',impact:'Sinergias entre os negócios'},
+      ],
+    },
+    digital:{
+      instagram:{status:'criar',url:''},
+      site:{status:'não precisa',url:'ML é o canal',plat:'Mercado Livre'},
+    },
+  },
+  mentorias:{
+    id:'mentorias', name:'Mentorias', icon:'🟣', theme:'mentorias',
+    blocker:'Sem perfil pessoal de autoridade — impossível vender mentoria sem autoridade visível',
+    metrics:[
+      {l:'Turmas Lançadas',v:'0',unit:'',color:'#A855F7'},
+      {l:'Potencial TikTok',v:'R$28k',unit:'por turma',color:'#16A854'},
+      {l:'Case Disponível',v:'ViiTss',unit:'R$600k/mês',color:'#E8A820'},
+    ],
+    pipe:{
+      'Fazer agora':[
+        {id:'men1',t:'Criar perfil pessoal Mauricio Ramos — Instagram',req:null,impact:'Base de tudo — autoridade visual'},
+        {id:'men2',t:'Criar LinkedIn Mauricio Ramos (EN prioritário)',req:null,impact:'Canal de vendas B2B e internacional'},
+        {id:'men3',t:'Registrar mauricioramos.com.br',req:null,impact:'R$40/ano · âncora digital'},
+      ],
+      'Em construção':[
+        {id:'men4',t:'Abrir inscrições: Mentoria TikTok Shop (8 vagas)',req:'men1',impact:'+R$28.000 / turma'},
+        {id:'men5',t:'Gravar case ViiTss como prova social',req:'men1',impact:'Argumento de venda mais forte'},
+        {id:'men6',t:'Estruturar Mentoria Importação Brás (R$2.500/aluno)',req:'men1',impact:'+R$20.000 / turma'},
+      ],
+      'Próximo mês':[
+        {id:'men7',t:'Lançar Mentoria Marketplace ML+Shopee (R$4.500)',req:'men4',impact:'+R$36.000 / turma'},
+        {id:'men8',t:'Consultoria Estratégica como porta de entrada (R$1.500)',req:'men2',impact:'Converte em contrato NextLevel'},
+      ],
+    },
+    digital:{
+      instagram:{status:'criar',url:''},
+      linkedin:{status:'criar',url:''},
+      site:{status:'criar',url:'mauricioramos.com.br',plat:'Framer'},
+    },
+  },
+  amazonia:{
+    id:'amazonia', name:'AmazonIA + IDESA', icon:'🌎', theme:'amazonia',
+    blocker:'IDESA sem diretoria renovada · AmazonIA sem produto construído — ambos em fase de planejamento',
+    metrics:[
+      {l:'IDESA Fundado',v:'2001',unit:'23 anos',color:'#16A854'},
+      {l:'AmazonIA',v:'Planejamento',unit:'sem produto',color:'#E8A820'},
+      {l:'Potencial',v:'USD',unit:'sem concorrente BR',color:'#A855F7'},
+    ],
+    pipe:{
+      'Fazer agora':[
+        {id:'az1',t:'Renovar diretoria IDESA — convocar AGE',req:null,impact:'Desbloqueia todos os editais de captação'},
+        {id:'az2',t:'Escrever proposta de valor AmazonIA (PT + EN)',req:null,impact:'Base do pitch, site e outreach'},
+        {id:'az3',t:'Criar LinkedIn AmazonIA Platform (EN)',req:'az2',impact:'Canal de vendas internacional'},
+      ],
+      'Em construção':[
+        {id:'az4',t:'Candidatura Fundo Clima BNDES 2025/2026',req:'az1',impact:'R$500k–R$2M por projeto'},
+        {id:'az5',t:'Proposta GIZ Brasil — Mineração Responsável',req:'az1',impact:'€200–350k'},
+        {id:'az6',t:'Especificação técnica MVP AmazonIA (no-code)',req:'az2',impact:'Airtable+Softr+Make+ANM API'},
+      ],
+      'Próximo mês':[
+        {id:'az7',t:'Candidatura Bezos Earth Fund',req:'az1',impact:'US$500k–US$1,5M'},
+        {id:'az8',t:'Outreach 10 clientes beta AmazonIA (LinkedIn EN)',req:'az3',impact:'US$290/mês cada'},
+      ],
+    },
+    digital:{
+      linkedin:{status:'criar EN',url:''},
+      youtube:{status:'criar',url:''},
+      site:{status:'criar EN',url:'amazoniaintelligence.com',plat:'Framer'},
+    },
+  },
+};
+
+/* CLIENTES */
+const CLIENTS={
+  alphaoutfit:{
+    id:'alphaoutfit', name:'Alpha Outfit', icon:'👕', theme:'alphaoutfit',
+    contractVal:689, contractDesc:'CRM R$189 + Meta Ads R$500',
+    varDesc:'Google Ads — upsell em negociação', varVal:0,
+    upsell:'Proposta Google Ads (+R$800–1.200/mês) · Upgrade CRM para R$299',
+    renewDate:'Contrato sem vencimento fixo',
+    deliveries:[
+      {id:'ao1',t:'Relatório semanal Meta Ads',freq:'Semanal',due:'Sexta',done:false},
+      {id:'ao2',t:'Otimização de campanhas',freq:'Semanal',due:'Quarta',done:false},
+      {id:'ao3',t:'2 criativos novos por mês',freq:'Quinzenal',due:'Dia 15',done:false},
+      {id:'ao4',t:'Relatório mensal de resultados',freq:'Mensal',due:'Dia 1',done:true},
+      {id:'ao5',t:'MauricioCRM — suporte contínuo',freq:'Contínuo',due:'Sempre',done:true},
+    ],
+    initExtras:[{id:'aoe1',t:'Proposta Google Ads',deadline:'Esta semana',priority:'high',done:false}],
+  },
+  viitss:{
+    id:'viitss', name:'ViiTss Moda', icon:'🎽', theme:'viitss',
+    contractVal:3000, contractDesc:'Tráfego pago + Gravação de conteúdo',
+    varDesc:'5% do faturamento do site próprio', varVal:0,
+    upsell:'MauricioCRM R$299/mês (não incluso ainda) · Google Shopping',
+    renewDate:'Mês a mês a partir do Mês 4',
+    deliveries:[
+      {id:'vt1',t:'Publicar vídeo já gravado',freq:'Urgente',due:'Esta semana',done:false},
+      {id:'vt2',t:'Configurar MauricioCRM + WhatsApp IA',freq:'Setup',due:'Esta semana',done:false},
+      {id:'vt3',t:'Configurar BM e subir campanhas Meta',freq:'Setup',due:'Esta semana',done:false},
+      {id:'vt4',t:'Gravação semanal na loja (Rua Maria Marcolina)',freq:'Semanal',due:'Terça manhã',done:false},
+      {id:'vt5',t:'Relatório semanal de anúncios',freq:'Semanal',due:'Sexta',done:false},
+      {id:'vt6',t:'Relatório mensal + apuração dos 5%',freq:'Mensal',due:'Dia 1',done:false},
+    ],
+    initExtras:[],
+  },
+  cusimodas:{
+    id:'cusimodas', name:'Cusi Modas', icon:'👔', theme:'cusimodas',
+    contractVal:0, contractDesc:'Permuta — sede Rua Rio Bonito por 6 meses',
+    varDesc:'50% lucro calças + 50% faturamento podcast/mentorias Roman', varVal:0,
+    upsell:'MauricioCRM R$299/mês · Gestão Google Ads quando site estiver no ar',
+    renewDate:'6 meses de permuta',
+    deliveries:[
+      {id:'cm1',t:'Criar Instagram Cusi Modas',freq:'Setup',due:'2 semanas',done:false},
+      {id:'cm2',t:'Criar site WordPress + WooCommerce',freq:'Setup',due:'2 semanas',done:false},
+      {id:'cm3',t:'Configurar MauricioCRM Cusi Modas',freq:'Setup',due:'1 semana',done:false},
+      {id:'cm4',t:'Gravar conteúdo Roman (podcast + redes)',freq:'Semanal',due:'Quinta tarde',done:false},
+      {id:'cm5',t:'Gestão de anúncios Cusi Modas',freq:'Mensal',due:'Após site no ar',done:false},
+    ],
+    initExtras:[{id:'cme1',t:'Setup técnico do podcast Roman',deadline:'2 semanas',priority:'normal',done:false}],
+  },
+};
+
+/* ════════════════════════════════════════════════════════════
+   STATE
+════════════════════════════════════════════════════════════ */
+let pg='home', T=THEMES.home, col=false;
+let st={
+  deliveries:{}, extras:{}, satOvr:{}, taskDone:{},
+  fin:{ao:689,vt:3000,vt_pct:0,cusi:0,outros:0},
+  xp:0, obj:'',
+};
+
+/* load */
+try{const d=localStorage.getItem('mrc9');if(d)st={...st,...JSON.parse(d)};}catch(e){}
+Object.values(CLIENTS).forEach(c=>{if(!st.extras[c.id])st.extras[c.id]=[...c.initExtras];});
+
+function save(){try{localStorage.setItem('mrc9',JSON.stringify(st));}catch(e){}}
+
+/* ── UTILS ── */
+const fT=s=>{const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sc=s%60;return h>0?`${h}:${z(m)}:${z(sc)}`:`${z(m)}:${z(sc)}`;};
+const z=n=>String(n).padStart(2,'0');
+const brl=v=>'R$ '+Number(v||0).toLocaleString('pt-BR');
+const grt=()=>{const h=new Date().getHours();return h<12?'Bom dia':h<18?'Boa tarde':'Boa noite';};
+const satC=v=>v>=80?'#16A854':v>=60?'#E8A820':'#EF4444';
+const satL=v=>v>=80?'Saudável':v>=60?'Atenção':'Crítico';
+const priC=p=>p==='critical'?'#EF4444':p==='high'?'#E8A820':'rgba(255,255,255,.35)';
+const isUrg=due=>['Esta semana','Urgente','1 semana'].includes(due);
+const LEVELS=[{n:'Fundador Solo',max:500},{n:'Estrategista',max:1200},{n:'Builder',max:2500},{n:'Visionário',max:5000},{n:'Lendário',max:Infinity}];
+const lvl=()=>LEVELS.find(l=>st.xp<l.max)||LEVELS[LEVELS.length-1];
+
+/* satisfaction */
+function sat(cid){
+  if(st.satOvr[cid]!==undefined)return st.satOvr[cid];
+  const c=CLIENTS[cid];const saved=st.deliveries[cid]||{};
+  const done=c.deliveries.filter(d=>(saved[d.id]!==undefined?saved[d.id]:d.done)).length;
+  return Math.round((done/Math.max(c.deliveries.length,1))*100);
+}
+function healthColor(cid){const v=sat(cid);return v>=80?'green':v>=60?'yellow':'red';}
+function urgCount(){
+  let n=0;Object.values(CLIENTS).forEach(c=>{
+    const saved=st.deliveries[c.id]||{};
+    c.deliveries.forEach(d=>{if(!(saved[d.id]!==undefined?saved[d.id]:d.done)&&isUrg(d.due))n++;});
+  });return n;
+}
+
+/* ── THEME ── */
+function applyT(key){
+  T=THEMES[key]||THEMES.home;
+  const root=document.documentElement;
+  root.style.setProperty('--a',T.a);
+  root.style.setProperty('--a-10',`rgba(${T.r},.10)`);
+  root.style.setProperty('--a-20',`rgba(${T.r},.20)`);
+  root.style.setProperty('--a-40',`rgba(${T.r},.40)`);
+  root.style.setProperty('--bg',T.bg);
+  root.style.setProperty('--surf',T.s);
+  root.style.setProperty('--card',T.c);
+  root.style.setProperty('--card2',T.c+'88');
+  root.style.setProperty('--border',`rgba(255,255,255,.07)`);
+  document.body.style.background=T.bg;
+  document.getElementById('top').style.background=T.s;
+  document.getElementById('top').style.borderBottomColor=`rgba(${T.r},.15)`;
+  document.getElementById('side').style.background=T.s;
+  document.getElementById('side').style.borderRightColor=`rgba(${T.r},.12)`;
+  document.getElementById('s-mark').style.background=`linear-gradient(135deg,${T.a},#7C3AED)`;
+  const dot=document.getElementById('t-dot'),lbl=document.getElementById('t-lbl');
+  if(dot){dot.style.background=T.a;dot.style.boxShadow=`0 0 10px ${T.a}`;}
+  if(lbl){lbl.textContent=T.lbl;lbl.style.color=T.a;}
+  const sxp=document.getElementById('s-xp-bar');
+  if(sxp)sxp.style.background=T.a;
+}
+
+/* ── NAV ── */
+function go(p){
+  pg=p;
+  document.querySelectorAll('.ni').forEach(b=>{
+    const on=b.dataset.p===p;
+    b.classList.toggle('on',on);
+    if(on){b.style.background=`rgba(${(THEMES[p]||THEMES.home).r},.12)`;b.style.color=(THEMES[p]||THEMES.home).a;}
+    else{b.style.background='';b.style.color='';}
+  });
+  applyT(p);
+  updateTop();
+  render();
+}
+
+function colSide(){
+  col=!col;
+  const s=document.getElementById('side');
+  s.classList.toggle('col',col);
+  const hide=el=>{if(el)el.style.display=col?'none':''};
+  document.querySelectorAll('.ni-lbl,.ni-tag,.ns,.ni-dot').forEach(hide);
+  hide(document.getElementById('s-txt'));
+  hide(document.getElementById('s-xp-wrap'));
+  hide(document.getElementById('col-lbl'));
+  hide(document.getElementById('ns1'));
+  hide(document.getElementById('ns2'));
+  hide(document.getElementById('ns3'));
+  document.getElementById('col-ico').textContent=col?'→':'←';
+}
+
+/* ── CLOCK ── */
+setInterval(()=>{
+  const now=new Date();
+  const hm=now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  const sec=':'+z(now.getSeconds());
+  const date=now.toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'short'});
+  const ehm=document.getElementById('t-hm'),esc=document.getElementById('t-sec'),edt=document.getElementById('t-date');
+  if(ehm)ehm.textContent=hm;if(esc)esc.textContent=sec;if(edt)edt.textContent=date;
+},1000);
+
+/* ── TOPBAR ── */
+function updateTop(){
+  const uc=urgCount();
+  const al=document.getElementById('t-alert');
+  if(al)al.innerHTML=uc?`<div class="t-alert blink" onclick="go('alphaoutfit')">● ${uc} entrega${uc>1?'s':''} urgente${uc>1?'s':''}</div>`:'';
+  document.getElementById('t-xp').textContent='⚡ '+st.xp;
+  /* sat badges */
+  [['ao','alphaoutfit'],['vt','viitss'],['cm','cusimodas']].forEach(([k,id])=>{
+    const el=document.getElementById('nb-'+k);const v=sat(id);
+    if(el){el.textContent=v+'%';el.style.color=satC(v);}
+  });
+  /* xp sidebar */
+  const L=lvl();const prev=LEVELS[LEVELS.indexOf(L)-1];const min=prev?prev.max:0;
+  const pct=L.max===Infinity?100:Math.round((st.xp-min)/(L.max-min)*100);
+  const xb=document.getElementById('s-xp-bar'),xl=document.getElementById('s-lvl'),xt=document.getElementById('s-xp-txt');
+  if(xb)xb.style.width=pct+'%';
+  if(xl)xl.textContent=L.n;
+  if(xt)xt.textContent=st.xp+' XP';
+  /* timer topbar */
+  const tt=document.getElementById('t-timer'),tb=document.getElementById('nb-tmr');
+  if(tt)tt.style.display=tmrRunning?'flex':'none';
+  if(tb)tb.style.display=tmrRunning?'':'none';
+}
+
+/* ── TIMER ── */
+let tmrSecs=0,tmrRunning=false,tmrLabel='',tmrIv=null;
+function tmrTick(){tmrSecs++;const d=document.getElementById('t-timer-disp');if(d)d.textContent=fT(tmrSecs);}
+function tmrStart(lbl=''){tmrLabel=lbl||tmrLabel;tmrRunning=true;if(tmrIv)clearInterval(tmrIv);tmrIv=setInterval(tmrTick,1000);document.getElementById('t-timer-lbl').textContent=tmrLabel;updateTop();}
+function tmrPause(){tmrRunning=false;clearInterval(tmrIv);updateTop();}
+function timerStop(){tmrPause();tmrSecs=0;if(pg==='timer')render();updateTop();}
+
+/* ── RENDER DISPATCH ── */
+function render(){
+  const m=document.getElementById('main');if(!m)return;
+  if(pg==='home'){renderHome(m);return;}
+  if(pg==='timer'){renderTimer(m);return;}
+  if(pg==='config'){renderConfig(m);return;}
+  if(CLIENTS[pg]){renderClient(m,pg);return;}
+  if(BIZ[pg]){renderBiz(m,pg);return;}
+  renderHome(m);
+}
+
+/* ════════════════════════════════════════════════════════════
+   HOME
+════════════════════════════════════════════════════════════ */
+function renderHome(el){
+  const fin=st.fin;
+  const total=Object.values(fin).reduce((a,v)=>a+(+v||0),0);
+  const m3=21689;
+  const mot=MOTD[Math.floor(Date.now()/4000)%MOTD.length];
+
+  /* biz health */
+  const bizCards=Object.values(BIZ).map(b=>{
+    const tdone=Object.keys(b.pipe).flatMap(k=>b.pipe[k]).filter(t=>st.taskDone[t.id]).length;
+    const ttot=Object.keys(b.pipe).flatMap(k=>b.pipe[k]).length;
+    const pct=Math.round(tdone/ttot*100);
+    const cls=pct>=60?'biz-green':pct>=30?'biz-yellow':ttot===0?'biz-gray':'biz-red';
+    const statusTxt=pct>=60?'Em progresso':pct>=30?'Atenção':ttot===0?'Planejado':'Travado';
+    const th=THEMES[b.theme]||THEMES.home;
+    return`<div class="biz-card ${cls}" onclick="go('${b.id}')"
+      style="--a:${th.a};border-color:rgba(${th.r},.15)">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        <span style="font-size:18px">${b.icon}</span>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${b.name}</div>
+          <div style="font-size:10px;color:${th.a};font-weight:600;margin-top:1px">${statusTxt}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <div style="font-size:14px;font-weight:800;color:${th.a};font-family:'JetBrains Mono',monospace">${pct}%</div>
+          <div style="font-size:9px;color:var(--txt3)">${tdone}/${ttot} ações</div>
+        </div>
+      </div>
+      <div class="bar"><div class="bar-f" style="width:${pct}%;background:${th.a}"></div></div>
+      <div style="font-size:10px;color:var(--txt3);margin-top:7px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+        🔒 ${b.blocker.split('—')[0].trim()}
+      </div>
+    </div>`;
+  }).join('');
+
+  /* client health */
+  const clientCards=Object.values(CLIENTS).map(c=>{
+    const v=sat(c.id);const sc=satC(v);
+    const th=THEMES[c.theme]||THEMES.home;
+    const urg=c.deliveries.filter(d=>{const done=(st.deliveries[c.id]||{})[d.id]!==undefined?(st.deliveries[c.id]||{})[d.id]:d.done;return!done&&isUrg(d.due);}).length;
+    return`<div class="biz-card" onclick="go('${c.id}')"
+      style="--a:${sc};border-color:rgba(255,255,255,.08)">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        <span style="font-size:18px">${c.icon}</span>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:700">${c.name}</div>
+          <div style="font-size:10px;color:var(--txt3)">${brl(c.contractVal)}/mês</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:18px;font-weight:800;color:${sc};font-family:'JetBrains Mono',monospace">${v}%</div>
+          <div style="font-size:9px;color:${sc};font-weight:700">${satL(v)}</div>
+        </div>
+      </div>
+      <div class="bar"><div class="bar-f" style="width:${v}%;background:${sc}"></div></div>
+      ${urg?`<div style="font-size:10px;color:#EF4444;margin-top:7px;font-weight:600">⚠ ${urg} entrega${urg>1?'s':''} urgente${urg>1?'s':''}</div>`:`<div style="font-size:10px;color:var(--txt3);margin-top:7px">${satL(v)} — ${c.contractDesc}</div>`}
+    </div>`;
+  }).join('');
+
+  /* next best action */
+  const nextAct=(()=>{
+    for(const c of Object.values(CLIENTS)){
+      const saved=st.deliveries[c.id]||{};
+      const urgs=c.deliveries.filter(d=>!(saved[d.id]!==undefined?saved[d.id]:d.done)&&isUrg(d.due));
+      if(urgs.length)return{label:`${c.icon} ${c.name}`,action:urgs[0].t,color:THEMES[c.theme]?.a||T.a,type:'cliente'};
+    }
+    for(const b of Object.values(BIZ)){
+      const first=Object.values(b.pipe).flat().find(t=>!st.taskDone[t.id]&&!t.req);
+      if(first)return{label:`${b.icon} ${b.name}`,action:first.t,color:THEMES[b.theme]?.a||T.a,type:'negocio'};
+    }
+    return null;
+  })();
+
+  el.innerHTML=`<div class="page-wrap fade">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:20px">
+    <div>
+      <div style="font-size:24px;font-weight:800">${grt()}, Mauricio 👋</div>
+      <div style="font-size:12px;color:var(--txt3);font-style:italic;margin-top:4px">"${mot}"</div>
+    </div>
+    <div style="flex-shrink:0">
+      <input class="inp" placeholder="Foco do dia..." value="${st.obj||''}" oninput="st.obj=this.value;save()"
+        style="width:260px;font-size:13px;font-weight:600;background:var(--a-10);border-color:var(--a-20)">
+    </div>
+  </div>
+
+  ${nextAct?`<div class="next-action">
+    <div style="font-size:9px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--a);margin-bottom:8px">⚡ Próxima Ação — ${nextAct.type==='cliente'?'Cliente':'Negócio'}</div>
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:11px;color:${nextAct.color};font-weight:700;margin-bottom:3px">${nextAct.label}</div>
+        <div style="font-size:14px;font-weight:600">${nextAct.action}</div>
+      </div>
+      <button class="btn btn-a" style="background:${nextAct.color};flex-shrink:0" onclick="tmrStart('${nextAct.action.replace(/'/g,"\\'")}');go('timer')">▶ Iniciar</button>
+    </div>
+  </div>`:'<div class="next-action"><div style="font-size:13px;font-weight:600;color:var(--a)">✅ Tudo em dia! Nenhuma ação urgente pendente.</div></div>'}
+
+  <div class="g3" style="margin-bottom:0">
+    <div class="card card-s" style="border-left:3px solid rgba(255,255,255,.2)">
+      <div class="label">Mês 3 — realizado</div>
+      <div style="font-size:20px;font-weight:800;color:var(--txt2)" class="mono">R$ 21.689</div>
+      <div class="dim-sm" style="margin-top:3px">Projetos + mensalidades</div>
+    </div>
+    <div class="card card-s card-accent">
+      <div class="label label-a">Mês 4 — recorrente</div>
+      <div style="font-size:20px;font-weight:800;color:var(--a)" class="mono" id="h-tot">${brl(total)}</div>
+      <div class="dim-sm" style="margin-top:3px">Contratos ativos mensais</div>
+    </div>
+    <div class="card card-s">
+      <div class="label">Meta mês 5</div>
+      <div style="font-size:20px;font-weight:800;color:#16A854" class="mono">R$ 35.000</div>
+      <div class="dim-sm" style="margin-top:3px">+turma TikTok +Google Ads</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <div class="label label-a" style="margin-bottom:12px">💰 Receitas do Grupo — edite</div>
+    ${[
+      {key:'ao',label:'Alpha Outfit — CRM + Meta Ads',color:'#06B6D4'},
+      {key:'vt',label:'ViiTss — Gestão + Conteúdo',color:'#EC4899'},
+      {key:'vt_pct',label:'ViiTss — 5% do site (variável)',color:'#EC4899'},
+      {key:'cusi',label:'Cusi / Roman — 50% resultado',color:'#10B981'},
+      {key:'outros',label:'Outros (CRM novos, projetos, mentorias)',color:'#A855F7'},
+    ].map(r=>`<div style="display:flex;align-items:center;gap:10px;margin-bottom:7px">
+      <div style="width:3px;height:28px;border-radius:2px;background:${r.color};flex-shrink:0"></div>
+      <span style="flex:1;font-size:12px;color:var(--txt2)">${r.label}</span>
+      <span class="dim-sm">R$</span>
+      <input type="number" class="fin-n" value="${fin[r.key]||0}" min="0"
+        oninput="st.fin['${r.key}']=+this.value;save();refreshFinTotals()"
+        style="border-color:rgba(${T.r},.2)">
+    </div>`).join('')}
+    <div style="display:flex;justify-content:space-between;align-items:center;padding-top:10px;margin-top:4px;border-top:1px solid var(--border)">
+      <span class="dim-sm">Total mês atual</span>
+      <span style="font-size:20px;font-weight:800;color:var(--a)" class="mono" id="h-tot2">${brl(total)}</span>
+    </div>
+  </div>
+
+  <div class="g2" style="margin-top:0">
+    <div class="card card-s">
+      <div class="label" style="color:#EF4444">📣 Ads NextLevel — R$500/mês</div>
+      <div class="dim" style="margin-bottom:8px">Meta: 1 cliente novo = payback em 6 dias</div>
+      <div style="font-size:14px;font-weight:700;color:#16A854;margin-bottom:8px">R$500 → Payback em 6 dias</div>
+      <div class="bar bar-h"><div class="bar-f" style="width:17%;background:#EF4444"></div></div>
+      <div class="dim-sm" style="margin-top:4px">R$500 investidos · R$3.000 máximo recomendado</div>
+    </div>
+    <div class="card card-s">
+      <div class="label" style="color:#16A854">🎯 Prioridades — próximo mês</div>
+      ${[
+        ['Turma Mentoria TikTok Shop','#A855F7','+R$28k'],
+        ['Google Ads Alpha Outfit','#06B6D4','+R$1k/mês'],
+        ['MauricioCRM ViiTss + Cusi','#3B82F6','+R$598/mês'],
+        ['1 novo cliente via ads','#E8A820','+R$2.8k/mês'],
+      ].map(([l,c,v],i)=>`<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:${i<3?'1px solid var(--border)':'none'}">
+        <span style="font-size:10px;color:var(--txt3);font-weight:700;min-width:14px">${i+1}.</span>
+        <span style="font-size:12px;flex:1">${l}</span>
+        <span style="font-size:12px;font-weight:700;color:${c}">${v}</span>
+      </div>`).join('')}
+    </div>
+  </div>
+
+  <div style="margin-top:0">
+    <div class="label" style="margin-bottom:10px">🏢 Saúde dos Negócios — clique para entrar</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-bottom:10px">${bizCards}</div>
+    <div class="label" style="margin-bottom:10px">🤝 Saúde dos Clientes</div>
+    <div class="g3">${clientCards}</div>
+  </div>
+  </div>`;
+}
+
+function refreshFinTotals(){
+  const t=Object.values(st.fin).reduce((a,v)=>a+(+v||0),0);
+  ['h-tot','h-tot2'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=brl(t);});
+}
+
+/* ════════════════════════════════════════════════════════════
+   BIZ PAGE
+════════════════════════════════════════════════════════════ */
+function renderBiz(el,id){
+  const b=BIZ[id];const th=THEMES[b.theme]||T;
+  const allTasks=Object.keys(b.pipe).flatMap(k=>b.pipe[k]);
+  const done=allTasks.filter(t=>st.taskDone[t.id]).length;
+  const pct=Math.round(done/Math.max(allTasks.length,1)*100);
+
+  /* digital status */
+  const digRows=Object.entries(b.digital||{}).map(([platform,info])=>{
+    const stMap={criar:'🔴 Criar',reorganizar:'🟡 Reorganizar','não precisa':'⚪ N/A',ativo:'🟢 Ativo','criar EN':'🔴 Criar (EN)','criar (EN)':'🔴 Criar (EN)'};
+    const statusStr=stMap[info.status]||info.status;
+    const isOk=info.status==='ativo'||info.status==='não precisa';
+    return`<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:10px;font-weight:700;text-transform:capitalize;color:var(--txt2);min-width:80px">${platform}</span>
+      <span style="font-size:11px;font-weight:600;color:${isOk?'#16A854':info.status==='reorganizar'?'#E8A820':'#EF4444'}">${statusStr}</span>
+      ${info.url?`<span style="font-size:10px;color:var(--txt3);margin-left:auto">${info.url}</span>`:''}
+      ${info.plat?`<span style="font-size:9px;padding:1px 6px;border-radius:4px;background:rgba(255,255,255,.06);color:var(--txt3)">${info.plat}</span>`:''}
+    </div>`;
+  }).join('');
+
+  el.innerHTML=`<div class="page-wrap fade">
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:18px">
+    <div>
+      <div class="pg-title">${b.icon} ${b.name}</div>
+      <div class="dim" style="margin-top:2px;max-width:560px">${b.blocker}</div>
+    </div>
+    <div style="text-align:right;flex-shrink:0">
+      <div style="font-size:28px;font-weight:800;color:${th.a};font-family:'JetBrains Mono',monospace">${pct}%</div>
+      <div style="font-size:10px;color:var(--txt3)">${done}/${allTasks.length} ações concluídas</div>
+    </div>
+  </div>
+
+  <div class="bar bar-h" style="margin-bottom:18px"><div class="bar-f" style="width:${pct}%;background:${th.a}"></div></div>
+
+  <div class="g3" style="margin-bottom:0">
+    ${b.metrics.map(m=>`<div class="card card-s stat">
+      <div class="stat-v" style="color:${m.color}">${m.v}</div>
+      <div class="dim-sm">${m.l}</div>
+      <div style="font-size:10px;color:var(--txt3);margin-top:1px">${m.unit}</div>
+    </div>`).join('')}
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <div class="label label-a" style="margin-bottom:12px">🚀 Pipeline de Ações</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      ${Object.entries(b.pipe).map(([col,tasks])=>{
+        const colColor=col==='Fazer agora'?'#EF4444':col==='Em construção'?'#E8A820':'rgba(255,255,255,.3)';
+        return`<div class="pipe-col" style="min-width:200px">
+          <div class="pipe-hd" style="color:${colColor};border-color:rgba(255,255,255,.08);background:rgba(255,255,255,.03)">${col}</div>
+          <div class="pipe-body">
+            ${tasks.map(t=>{
+              const isDone=!!st.taskDone[t.id];
+              const isLocked=!!t.req&&!st.taskDone[t.req];
+              return`<div class="pipe-item${isDone?' done':isLocked?' locked':''}"
+                style="border-color:rgba(255,255,255,.07);opacity:${isDone?.35:isLocked?.4:1}"
+                onclick="${isLocked||isDone?'':(`bizTask('${id}','${t.id}','${t.t.replace(/'/g,"\\'")}')`)}">
+                <div style="display:flex;align-items:flex-start;gap:7px">
+                  <span style="margin-top:1px;font-size:12px">${isDone?'✅':isLocked?'🔒':'○'}</span>
+                  <div style="flex:1;min-width:0">
+                    <div style="font-size:12px;font-weight:500;line-height:1.3;text-decoration:${isDone?'line-through':'none'}">${t.t}</div>
+                    <div style="font-size:10px;color:${th.a};margin-top:4px">${t.impact}</div>
+                    ${isLocked?`<div style="font-size:9px;color:var(--txt3);margin-top:2px">Aguarda: ${b.pipe[Object.keys(b.pipe)[0]].concat(...Object.values(b.pipe)).find(x=>x.id===t.req)?.t||t.req}</div>`:''}
+                  </div>
+                </div>
+              </div>`;
+            }).join('')}
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:0">
+    <div class="label" style="margin-bottom:10px">🌐 Presença Digital</div>
+    ${digRows||'<div class="dim-sm">Nenhuma plataforma mapeada</div>'}
+  </div>
+  </div>`;
+}
+
+function bizTask(bizId,taskId,taskName){
+  if(st.taskDone[taskId]){
+    st.taskDone[taskId]=false;
+    st.xp=Math.max(0,st.xp-20);
+  }else{
+    st.taskDone[taskId]=true;
+    st.xp+=20;
+  }
+  save();updateTop();renderBiz(document.getElementById('main'),bizId);
+}
+
+/* ════════════════════════════════════════════════════════════
+   CLIENT PAGE
+════════════════════════════════════════════════════════════ */
+function renderClient(el,id){
+  const c=CLIENTS[id];const th=THEMES[c.theme]||T;
+  const v=sat(id);const sc=satC(v);
+  const saved=st.deliveries[id]||{};
+  const done=c.deliveries.filter(d=>(saved[d.id]!==undefined?saved[d.id]:d.done)).length;
+  const cExtras=st.extras[id]||[];
+
+  el.innerHTML=`<div class="page-wrap fade">
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:18px">
+    <div>
+      <div class="pg-title">${c.icon} ${c.name}</div>
+      <div class="dim" style="margin-top:2px">${c.contractDesc}</div>
+      <div class="dim-sm" style="margin-top:2px">${c.varDesc}</div>
+    </div>
+    <div style="text-align:right;flex-shrink:0">
+      <div style="font-size:32px;font-weight:800;color:${sc};font-family:'JetBrains Mono',monospace">${v}%</div>
+      <div style="font-size:11px;font-weight:700;color:${sc}">${satL(v)}</div>
+      <div class="dim-sm">saúde do contrato</div>
+    </div>
+  </div>
+
+  <div class="g3" style="margin-bottom:0">
+    <div class="card card-s" style="border-left:3px solid ${th.a}">
+      <div class="label">Receita Fixa</div>
+      <div style="font-size:20px;font-weight:800;color:${th.a}" class="mono">${brl(c.contractVal)}<span style="font-size:11px;color:var(--txt3);font-weight:400;font-family:'DM Sans',sans-serif">/mês</span></div>
+    </div>
+    <div class="card card-s">
+      <div class="label">Receita Variável</div>
+      <div style="font-size:14px;font-weight:700;color:${c.varVal>0?'#16A854':'var(--txt3)'}" class="mono">${c.varVal>0?brl(c.varVal):'—'}</div>
+      <div class="dim-sm" style="margin-top:3px">${c.varDesc}</div>
+    </div>
+    <div class="card card-s">
+      <div class="label">Oportunidade</div>
+      <div style="font-size:11px;color:#E8A820;font-weight:600;line-height:1.5">${c.upsell}</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+      <div class="label" style="margin:0">Satisfação manual</div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap">
+        ${[null,40,60,75,90,100].map(val=>`
+        <button onclick="setSat('${id}',${JSON.stringify(val)})"
+          style="padding:3px 9px;border-radius:15px;border:1px solid ${st.satOvr[id]===val?'rgba(255,255,255,.5)':'var(--border)'};
+          background:${st.satOvr[id]===val?'rgba(255,255,255,.1)':'transparent'};
+          color:${val===null?'var(--txt3)':satC(val)};cursor:pointer;font-family:inherit;font-size:11px;font-weight:600;transition:all .15s">
+          ${val===null?'Auto':val+'%'}
+        </button>`).join('')}
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:0">
+    <div class="label" style="margin-bottom:12px">📋 Entregas do Contrato</div>
+    <div id="del-${id}"></div>
+    <div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--border)">
+      <div class="bar"><div class="bar-f" id="del-bar-${id}" style="width:${Math.round(done/c.deliveries.length*100)}%;background:${th.a}"></div></div>
+      <div class="dim-sm" style="margin-top:4px" id="del-cnt-${id}">${done}/${c.deliveries.length} entregas em dia</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:0;border-color:rgba(${th.r},.2)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div class="label label-a" style="margin:0">⚡ Demandas Extras</div>
+      <button class="btn btn-g btn-sm" onclick="toggleForm('${id}')">+ Adicionar</button>
+    </div>
+    <div class="add-form" id="form-${id}">
+      <input class="inp" id="et-${id}" placeholder="Descreva a demanda..." style="margin-bottom:7px">
+      <div class="g2" style="gap:7px;margin-bottom:7px">
+        <input class="inp" id="edl-${id}" placeholder="Prazo (ex: Sexta-feira)">
+        <select class="inp" id="epr-${id}">
+          <option value="normal">Normal</option>
+          <option value="high">Alta prioridade</option>
+          <option value="critical">Crítico</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:7px">
+        <button class="btn btn-a" style="background:${th.a}" onclick="addExtra('${id}')">Salvar</button>
+        <button class="btn btn-g" onclick="toggleForm('${id}')">Cancelar</button>
+      </div>
+    </div>
+    <div id="ext-${id}"></div>
+  </div>
+  </div>`;
+
+  renderDeliveries(id);
+  renderExtras(id);
+}
+
+function renderDeliveries(id){
+  const c=CLIENTS[id];const th=THEMES[c.theme]||T;
+  const saved=st.deliveries[id]||{};
+  const el=document.getElementById('del-'+id);if(!el)return;
+  el.innerHTML=c.deliveries.map(d=>{
+    const isDone=saved[d.id]!==undefined?saved[d.id]:d.done;
+    const urg=!isDone&&isUrg(d.due);
+    return`<div class="del">
+      <div class="chk${isDone?' on':''}" style="background:${isDone?th.a:'transparent'};border-color:${isDone?th.a:'rgba(255,255,255,.2)'}"
+        onclick="togDel('${id}','${d.id}')">${isDone?'✓':''}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:12px;font-weight:500;text-decoration:${isDone?'line-through':'none'};color:${isDone?'var(--txt3)':'var(--txt)'};overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${d.t}</div>
+        <div class="dim-sm" style="margin-top:1px">${d.freq} · ${d.due}</div>
+      </div>
+      ${urg?'<span class="urg">urgente</span>':''}
+    </div>`;
+  }).join('');
+  /* update bar */
+  const doneCount=c.deliveries.filter(d=>(saved[d.id]!==undefined?saved[d.id]:d.done)).length;
+  const bar=document.getElementById('del-bar-'+id),cnt=document.getElementById('del-cnt-'+id);
+  if(bar)bar.style.width=Math.round(doneCount/c.deliveries.length*100)+'%';
+  if(cnt)cnt.textContent=doneCount+'/'+c.deliveries.length+' entregas em dia';
+}
+
+function renderExtras(id){
+  const el=document.getElementById('ext-'+id);if(!el)return;
+  const list=st.extras[id]||[];
+  if(!list.length){el.innerHTML=`<div class="dim-sm" style="text-align:center;padding:14px 0">Nenhuma demanda extra</div>`;return;}
+  const th=THEMES[CLIENTS[id]?.theme]||T;
+  el.innerHTML=list.map(e=>`<div class="extra" style="opacity:${e.done?.42:1}">
+    <div class="chk${e.done?' on':''}" style="background:${e.done?th.a:'transparent'};border-color:${e.done?th.a:priC(e.priority)};margin-top:1px"
+      onclick="togExtra('${id}','${e.id}')">${e.done?'✓':''}</div>
+    <div style="flex:1;min-width:0">
+      <div style="font-size:12px;font-weight:500;text-decoration:${e.done?'line-through':'none'}">${e.t}</div>
+      <div style="display:flex;gap:8px;margin-top:3px;flex-wrap:wrap">
+        ${e.deadline?`<span class="dim-sm">📅 ${e.deadline}</span>`:''}
+        <span style="font-size:10px;font-weight:700;color:${priC(e.priority)}">${e.priority}</span>
+      </div>
+    </div>
+  </div>`).join('');
+}
+
+function togDel(id,did){
+  if(!st.deliveries[id])st.deliveries[id]={};
+  const c=CLIENTS[id];const d=c.deliveries.find(x=>x.id===did);
+  const was=st.deliveries[id][did]!==undefined?st.deliveries[id][did]:d.done;
+  st.deliveries[id][did]=!was;
+  if(!was)st.xp+=10;else st.xp=Math.max(0,st.xp-10);
+  save();renderDeliveries(id);updateTop();
+}
+function togExtra(id,eid){
+  st.extras[id]=(st.extras[id]||[]).map(e=>e.id===eid?{...e,done:!e.done}:e);
+  save();renderExtras(id);
+}
+function toggleForm(id){const el=document.getElementById('form-'+id);if(el)el.style.display=el.style.display==='block'?'none':'block';}
+function addExtra(id){
+  const t=document.getElementById('et-'+id)?.value.trim();if(!t)return;
+  const dl=document.getElementById('edl-'+id)?.value||'';
+  const pr=document.getElementById('epr-'+id)?.value||'normal';
+  if(!st.extras[id])st.extras[id]=[];
+  st.extras[id].push({id:id+'-e'+Date.now(),t,deadline:dl,priority:pr,done:false});
+  save();toggleForm(id);renderExtras(id);
+}
+function setSat(id,v){st.satOvr[id]=v;save();renderClient(document.getElementById('main'),id);updateTop();}
+
+/* ════════════════════════════════════════════════════════════
+   TIMER PAGE
+════════════════════════════════════════════════════════════ */
+function renderTimer(el){
+  el.innerHTML=`<div class="page-wrap fade" style="max-width:560px">
+  <div class="pg-title" style="margin-bottom:18px">⏱ Cronômetro</div>
+  <div class="card" style="text-align:center;padding:32px 24px;border-color:${tmrRunning?'rgba(239,68,68,.4)':'var(--border)'}">
+    <div id="timer-disp" class="mono" style="font-size:56px;font-weight:700;letter-spacing:4px;color:${tmrRunning?'#EF4444':'var(--txt)'};margin-bottom:16px">${fT(tmrSecs)}</div>
+    <input id="tmr-lbl-inp" class="inp" value="${tmrLabel}" placeholder="Nome da sessão..."
+      oninput="tmrLabel=this.value;document.getElementById('t-timer-lbl').textContent=this.value"
+      style="max-width:320px;margin:0 auto 16px;text-align:center;display:block">
+    <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+      <button onclick="tmrRunning?tmrPause():tmrStart();if(pg==='timer')render()" class="btn"
+        style="background:${tmrRunning?'rgba(255,255,255,.08)':'#EF4444'};color:${tmrRunning?'var(--txt)':'white'};padding:10px 28px;font-size:14px">
+        ${tmrRunning?'⏸ Pausar':'▶ Iniciar'}
+      </button>
+      <button onclick="timerStop()" class="btn"
+        style="background:rgba(239,68,68,.12);color:#EF4444;border:1px solid rgba(239,68,68,.28);padding:10px 18px">
+        ⏹ Parar
+      </button>
+      <button onclick="tmrSecs=0;tmrRunning=false;clearInterval(tmrIv);if(pg==='timer')render()" class="btn btn-g" style="padding:10px 14px">↺</button>
+    </div>
+  </div>
+  </div>`;
+  if(tmrRunning){clearInterval(tmrIv);tmrIv=setInterval(tmrTick,1000);}
+}
+
+/* ════════════════════════════════════════════════════════════
+   CONFIG
+════════════════════════════════════════════════════════════ */
+function renderConfig(el){
+  el.innerHTML=`<div class="page-wrap fade" style="max-width:500px">
+  <div class="pg-title" style="margin-bottom:18px">⚙️ Config</div>
+  <div class="card">
+    <div class="label">Dados</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px">
+      <button class="btn btn-g" onclick="exportData()">📥 Exportar progresso</button>
+      <button class="btn" style="background:rgba(239,68,68,.1);color:#EF4444;border:1px solid rgba(239,68,68,.25)"
+        onclick="if(confirm('Resetar tudo?')&&confirm('Confirme novamente.')){localStorage.removeItem('mrc9');location.reload();}">
+        ⚠ Resetar tudo
+      </button>
+    </div>
+    <div style="margin-top:14px;padding:12px;background:var(--card2);border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--txt3);line-height:1.8">
+      XP: ${st.xp} · Nível: ${lvl().n}<br>
+      Tarefas concluídas: ${Object.keys(st.taskDone).filter(k=>st.taskDone[k]).length}<br>
+      Entregas concluídas: ${Object.values(st.deliveries).flatMap(Object.values).filter(Boolean).length}<br>
+      MRC OS v9 · 2025
+    </div>
+  </div>
+  </div>`;
+}
+
+function exportData(){
+  const lines=['# MRC OS — Progresso exportado',new Date().toLocaleDateString('pt-BR'),
+    '','## Tarefas Concluídas',
+    ...Object.entries(st.taskDone).filter(([,v])=>v).map(([k])=>'- '+k),
+    '','## XP: '+st.xp,'Nível: '+lvl().n,
+  ];
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([lines.join('\n')],{type:'text/plain'}));
+  a.download='mrc-progress.txt';a.click();
+}
+
+/* ════════════════════════════════════════════════════════════
+   INIT
+════════════════════════════════════════════════════════════ */
+applyT('home');
+updateTop();
+render();
+</script>
+</body>
+</html>
