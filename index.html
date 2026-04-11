@@ -955,18 +955,17 @@ function renderMarkdown(txt){
 }
 
 /* ─── AI PROVIDER LAYER ─────────────────────────────────
-   Suporta OpenAI (gpt-4o-mini) e Anthropic (claude-sonnet-4-6).
-   Usa OpenAI se a chave openai estiver configurada, senão Anthropic.
+   Padrão: Pollinations.ai (gratuito, sem API key, funciona direto).
+   Upgrade opcional: OpenAI ou Anthropic se a chave estiver configurada.
 ──────────────────────────────────────────────────────── */
 function aiProvider(){
   if(st.integrations?.openai?.key)return'openai';
   if(st.integrations?.anthropic?.key)return'anthropic';
-  return null;
+  return'free'; // Pollinations.ai — sem chave, sem custo
 }
 
 async function callAI(systemPrompt, userPrompt, maxTokens=1000){
   const provider=aiProvider();
-  if(!provider)return null;
 
   if(provider==='openai'){
     const resp=await fetch('https://api.openai.com/v1/chat/completions',{
@@ -1003,16 +1002,29 @@ async function callAI(systemPrompt, userPrompt, maxTokens=1000){
     const d=await resp.json();
     return d.content&&d.content[0]?d.content[0].text:'';
   }
+
+  // Pollinations.ai — gratuito, sem chave
+  const resp=await fetch('https://text.pollinations.ai/',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      messages:[{role:'system',content:systemPrompt},{role:'user',content:userPrompt}],
+      model:'openai',
+      seed:-1,
+      private:true,
+    }),
+  });
+  if(!resp.ok)throw new Error('Pollinations error '+resp.status);
+  return await resp.text();
 }
 
 function aiNoKeyMsg(){
-  return'⚠️ Configure sua **OpenAI API Key** (ou Anthropic) em ⚙️ Config &amp; Integrações para ativar a IA.';
+  return'⚠️ Erro ao conectar com a IA. Verifique sua conexão ou configure uma chave em ⚙️ Config.';
 }
 
 async function aiQuery(prompt,cacheKey,ctx,ttl=4*3600*1000){
   const cached=getCache(cacheKey,ttl);
   if(cached)return cached;
-  if(!aiProvider())return aiNoKeyMsg();
   try{
     const txt=await callAI(
       'Você é o assistente estratégico do MRC OS v13. Responda em português brasileiro. Seja direto e prático.',
@@ -1082,7 +1094,6 @@ function hideTyping(){const t=document.getElementById('chat-typing');if(t)t.remo
 async function sendChatMessage(msg){
   renderChatBubble('user',msg);
   showTyping();
-  if(!aiProvider()){hideTyping();renderChatBubble('ai',aiNoKeyMsg());return;}
   try{
     const ctx=`Estado atual: Receita mensal R$${totalRev().toLocaleString('pt-BR')}, Meta: R$10.000. XP: ${st.xp}. Negócios ativos: NextLevel, Brás Digital, MauricioCRM, Mega Tron, Mentorias, AmazonIA+IDESA. Clientes: Alpha Outfit, ViiTss, Cusi Modas.`;
     const txt=await callAI(
@@ -1227,7 +1238,6 @@ Retorne SOMENTE JSON válido com esta estrutura (sem markdown, sem backticks):
 {"mon":[{"time":"HH:MM","duration":90,"label":"...","icon":"emoji","color":"#hex","bizRef":null}],"tue":[...],"wed":[...],"thu":[...],"fri":[...],"sat":[...]}
 Máximo 4 blocos por dia. Seja realista para um fundador solo.`;
 
-  if(!aiProvider()){toast('⚠️ Configure a OpenAI API Key em Config');if(btn){btn.disabled=false;btn.textContent='⚡ Sugerir com IA';}return;}
   try{
     const rawTxt=await callAI(
       'Você é um assistente de produtividade. Retorne SOMENTE JSON válido, sem markdown, sem texto extra.',
@@ -1493,7 +1503,6 @@ async function suggestToolForTask(task){
   const prompt=`Mauricio quer: "${task}". 
 Ferramentas disponíveis: ${tools}.
 Qual(is) ferramenta(s) usar? Como? Seja direto. Máximo 3 frases.`;
-  if(!aiProvider()){if(el)el.innerHTML='<div class="dimx">⚠️ Configure a OpenAI API Key em Config para usar esta função.</div>';return;}
   try{
     const txt=await callAI('Responda em português brasileiro, de forma direta e prática.',prompt,300);
     if(el)el.innerHTML=`<div class="ai-panel" style="margin-top:0">${renderMarkdown(txt)}</div>`;
@@ -1597,11 +1606,6 @@ no AmazonIA Intelligence Platform e em outros SaaS.
 Seja direto. Use exemplos reais do ecossistema dele.
 Máximo 200 palavras + 1 exemplo prático concreto.`;
 
-  if(!aiProvider()){
-    const lc=document.getElementById('lesson-content');
-    if(lc)lc.innerHTML='<div class="dimx">⚠️ Configure a OpenAI API Key em ⚙️ Config para carregar o conteúdo desta aula.</div>';
-    return;
-  }
   try{
     const txt=await callAI('Responda em português brasileiro, de forma direta, prática e motivadora.',prompt,500);
     const lc=document.getElementById('lesson-content');
@@ -2419,24 +2423,24 @@ function startTimerWithTask(){const inp=document.getElementById('timer-task-inp'
 function renderConfig(el){
   const saves=st._saveCount||0;
   const last=st._lastSave?new Date(st._lastSave).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):'—';
-  const aiKeyMissing=!aiProvider();
+  const freeAI=aiProvider()==='free';
   el.innerHTML=`<div class="pw fade">
   <div class="pg-h">⚙️ Config &amp; Integrações</div>
   <div class="pg-sub">Configurações, dados e integrações do MRC OS v13</div>
 
-  ${aiKeyMissing?`<div class="card" style="margin-top:20px;margin-bottom:14px;border:1px solid rgba(124,58,237,.4);background:rgba(124,58,237,.07)">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
-      <span style="font-size:20px">🤖</span>
-      <span style="font-size:13px;font-weight:700;color:var(--t1)">IA não configurada</span>
+  <div class="card" style="margin-top:20px;margin-bottom:14px;border:1px solid rgba(22,168,84,.25);background:rgba(22,168,84,.05)">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+      <span style="font-size:18px">🤖</span>
+      <span style="font-size:13px;font-weight:700;color:#16A854">IA ativa${freeAI?' — modo gratuito (Pollinations.ai)':' — chave configurada'}</span>
     </div>
-    <div class="dim" style="margin-bottom:12px;font-size:12px">Para usar o chat MRC AI e as análises estratégicas, configure uma chave de API abaixo.</div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap">
-      <button class="btn btn-a" onclick="configIntegration('openai')">🟢 Configurar OpenAI (Recomendado)</button>
-      <button class="btn btn-g" onclick="configIntegration('anthropic')">🟣 Configurar Anthropic</button>
-    </div>
-  </div>`:''}
+    <div class="dim" style="font-size:12px">${freeAI?'Funcionando sem custo. Para respostas mais rápidas e precisas, configure uma chave OpenAI ou Anthropic abaixo.':'Usando chave de API configurada. Remova para voltar ao modo gratuito.'}</div>
+    ${freeAI?`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+      <button class="btn btn-g btn-xs" onclick="configIntegration('openai')">⚡ Upgrade OpenAI</button>
+      <button class="btn btn-g btn-xs" onclick="configIntegration('anthropic')">⚡ Upgrade Anthropic</button>
+    </div>`:''}
+  </div>
 
-  <div class="card" style="margin-top:${aiKeyMissing?'0':'20px'};margin-bottom:14px">
+  <div class="card" style="margin-top:0;margin-bottom:14px">
     <div class="sec-lbl" style="margin-bottom:12px">📊 Estado do Sistema</div>
     ${[{l:'Versão',v:'MRC OS v13'},{l:'Salvamentos',v:saves+' vezes'},{l:'Último save',v:last},{l:'XP total',v:st.xp+' XP'},{l:'Nível',v:lvl().n},{l:'Tarefas concluídas',v:Object.values(st.taskDone).filter(Boolean).length},{l:'Armazenamento',v:'localStorage (mrc12 + mrc11 compat)'}].map(r=>`<div class="dig-row"><span class="dig-plat">${r.l}</span><span style="font-size:12px;color:var(--t1);font-family:'JetBrains Mono',monospace">${r.v}</span></div>`).join('')}
   </div>
