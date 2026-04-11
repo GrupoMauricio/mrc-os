@@ -1663,7 +1663,7 @@ function renderIntegrationsConfig(el){
             ${id==='gcal'?
               `<span class="tag tag-green">Sempre ativo</span>`:
               intg.active?
-                `<span class="tag tag-green">Ativo</span><button class="btn btn-g btn-xs" onclick="configIntegration('${id}')">Trocar</button>`:
+                `<span class="tag tag-green">Ativo</span><button class="btn btn-g btn-xs" onclick="configIntegration('${id}')">Trocar</button><button class="btn btn-xs" style="color:#EF4444;border-color:rgba(239,68,68,.3);background:rgba(239,68,68,.06)" onclick="removeIntegration('${id}')">Remover</button>`:
                 `<button class="btn btn-a btn-xs${id==='anthropic'?' glow-a':''}" onclick="configIntegration('${id}')">${id==='anthropic'?'🤖 Configurar IA':'Configurar'}</button>`
             }
           </div>
@@ -1678,6 +1678,14 @@ function configIntegration(id){
   st.integrations[id].key=key;
   st.integrations[id].active=true;
   save();toast('✅ Integração configurada!');
+  renderConfig(document.getElementById('main'));
+}
+
+function removeIntegration(id){
+  if(!confirm(`Remover a chave de "${st.integrations[id]?.label||id}"?`))return;
+  st.integrations[id].key='';
+  st.integrations[id].active=false;
+  save();toast('🗑 Chave removida');
   renderConfig(document.getElementById('main'));
 }
 
