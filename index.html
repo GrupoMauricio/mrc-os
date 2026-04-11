@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>MRC OS</title>
+<title>MRC OS v11</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>"/>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet"/>
 <style>
@@ -379,7 +379,7 @@ select.inp{cursor:pointer}
     <div class="t-mark" id="t-mark">⚡</div>
     <div id="t-txt">
       <div class="t-name">MRC OS</div>
-      <div class="t-ver">v10 · 2025</div>
+      <div class="t-ver">v11 · 2025</div>
     </div>
   </div>
   <div class="top-ctx" id="top-ctx">
@@ -421,12 +421,19 @@ select.inp{cursor:pointer}
     <button class="ni" data-p="mauriciocrm" onclick="go('mauriciocrm')"><span class="ni-ico">🔵</span><span class="ni-lbl">MauricioCRM</span>  <span class="ni-tag" id="nb-crm">SaaS</span></button>
     <button class="ni" data-p="megatron"    onclick="go('megatron')"  ><span class="ni-ico">🔴</span><span class="ni-lbl">Mega Tron</span>     <span class="ni-dot"></span><span class="ni-tag" id="nb-mt" style="color:#EF4444">ML</span></button>
     <button class="ni" data-p="mentorias"   onclick="go('mentorias')" ><span class="ni-ico">🟣</span><span class="ni-lbl">Mentorias</span>     <span class="ni-tag" id="nb-men">lançar</span></button>
-    <button class="ni" data-p="amazonia"    onclick="go('amazonia')"  ><span class="ni-ico">🌎</span><span class="ni-lbl">AmazonIA+IDESA</span><span class="ni-tag" id="nb-az">plano</span></button>
-    <div class="ns" id="ns2">Clientes</div>
+    <div class="ns" id="ns2">IDESA + AmazonIA</div>
+    <button class="ni" data-p="amazoniaplat" onclick="go('amazoniaplat')"><span class="ni-ico">🌎</span><span class="ni-lbl">AmazonIA Platform</span><span class="ni-dot"></span></button>
+    <button class="ni" data-p="idesapg"      onclick="go('idesapg')"    ><span class="ni-ico">🌿</span><span class="ni-lbl">IDESA-MRS</span>        <span class="ni-dot"></span></button>
+    <button class="ni" data-p="entidades"    onclick="go('entidades')"  ><span class="ni-ico">🏛️</span><span class="ni-lbl">Entidades &amp; Modelo</span></button>
+    <div class="ns" id="ns3">Clientes</div>
     <button class="ni" data-p="alphaoutfit" onclick="go('alphaoutfit')"><span class="ni-ico">👕</span><span class="ni-lbl">Alpha Outfit</span> <span class="ni-tag" id="nb-ao">—</span></button>
     <button class="ni" data-p="viitss"      onclick="go('viitss')"    ><span class="ni-ico">🎽</span><span class="ni-lbl">ViiTss</span>        <span class="ni-tag" id="nb-vt">—</span></button>
     <button class="ni" data-p="cusimodas"   onclick="go('cusimodas')" ><span class="ni-ico">👔</span><span class="ni-lbl">Cusi Modas</span>    <span class="ni-tag" id="nb-cm">—</span></button>
-    <div class="ns" id="ns3">Ferramentas</div>
+    <div class="ns" id="ns4">Produção</div>
+    <button class="ni" data-p="social" onclick="go('social')"><span class="ni-ico">📱</span><span class="ni-lbl">Redes Sociais</span></button>
+    <button class="ni" data-p="videos" onclick="go('videos')"><span class="ni-ico">🎬</span><span class="ni-lbl">Edição de Vídeos</span></button>
+    <button class="ni" data-p="ads"    onclick="go('ads')"   ><span class="ni-ico">📣</span><span class="ni-lbl">Gestão de Ads</span></button>
+    <div class="ns" id="ns5">Ferramentas</div>
     <button class="ni" data-p="timer"  onclick="go('timer')" ><span class="ni-ico">⏱</span><span class="ni-lbl">Cronômetro</span><span class="ni-tag" id="nb-tmr" style="display:none;color:#EF4444">●</span></button>
     <button class="ni" data-p="config" onclick="go('config')"><span class="ni-ico">⚙️</span><span class="ni-lbl">Config</span></button>
   </div>
@@ -466,6 +473,12 @@ const TH={
   cusimodas:  {a:'#10B981',r:'16,185,129',  bg:'#010E06',s:'#02130A',c:'#031A0D',c2:'#052012',lbl:'Cusi Modas'},
   timer:      {a:'#EF4444',r:'239,68,68',   bg:'#07070D',s:'#0C0C14',c:'#111120',c2:'#161626',lbl:'Cronômetro'},
   config:     {a:'#6B7280',r:'107,114,128', bg:'#07070D',s:'#0C0C14',c:'#111120',c2:'#161626',lbl:'Config'},
+  amazoniaplat:{a:'#F59E0B',r:'245,158,11',  bg:'#0D0900',s:'#130E00',c:'#1A1300',c2:'#201800',lbl:'AmazonIA Platform'},
+  idesapg:    {a:'#16A854',r:'22,168,84',   bg:'#02100A',s:'#03150C',c:'#041C0F',c2:'#062213',lbl:'IDESA-MRS'},
+  entidades:  {a:'#7C3AED',r:'124,58,237',  bg:'#07070D',s:'#0C0C14',c:'#111120',c2:'#161626',lbl:'Entidades'},
+  social:     {a:'#8B5CF6',r:'139,92,246',  bg:'#06040D',s:'#090613',c:'#0D091B',c2:'#120C22',lbl:'Redes Sociais'},
+  videos:     {a:'#EF4444',r:'239,68,68',   bg:'#0E0101',s:'#130202',c:'#1A0303',c2:'#200404',lbl:'Edição de Vídeos'},
+  ads:        {a:'#0EA5E9',r:'14,165,233',  bg:'#010A0F',s:'#020E14',c:'#03131B',c2:'#041822',lbl:'Gestão de Ads'},
 };
 
 /* ═══════════════════════════════════════════════════
@@ -694,12 +707,12 @@ const CLIENTS={
    STATE
 ═══════════════════════════════════════════════════ */
 let pg='home',T=TH.home,sCol=false;
-let st={deliveries:{},extras:{},satOvr:{},taskDone:{},fin:{ao:689,vt:3000,vt_pct:0,cusi:0,outros:0},xp:0,obj:''};
+let st={deliveries:{},extras:{},satOvr:{},taskDone:{},fin:{ao:689,vt:3000,vt_pct:0,cusi:0,outros:0},xp:0,obj:'',posts:[],videos:[],adsCampaigns:[],_sBrand:'Todos',_vBrand:'Todos',_adsPl:'Todos'};
 
-try{const d=localStorage.getItem('mrc10');if(d)st={...st,...JSON.parse(d)};}catch(e){}
+try{const d=localStorage.getItem('mrc11');if(d)st={...st,...JSON.parse(d)};}catch(e){}
 Object.values(CLIENTS).forEach(c=>{if(!st.extras[c.id])st.extras[c.id]=[...c.initExtras];});
 
-function save(){try{localStorage.setItem('mrc10',JSON.stringify(st));}catch(e){}}
+function save(){try{localStorage.setItem('mrc11',JSON.stringify(st));}catch(e){}}
 
 /* ── UTILS ── */
 const fT=s=>{const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sc=s%60;return h>0?`${h}:${z(m)}:${z(sc)}`:`${z(m)}:${z(sc)}`;};
@@ -837,6 +850,12 @@ function render(){
   if(pg==='home'){renderHome(m);return;}
   if(pg==='timer'){renderTimer(m);return;}
   if(pg==='config'){renderConfig(m);return;}
+  if(pg==='amazoniaplat'){renderAmazonIA(m);return;}
+  if(pg==='idesapg'){renderIDESA(m);return;}
+  if(pg==='entidades'){renderEntidades(m);return;}
+  if(pg==='social'){renderSocial(m);return;}
+  if(pg==='videos'){renderVideos(m);return;}
+  if(pg==='ads'){renderAds(m);return;}
   if(CLIENTS[pg]){renderClient(m,pg);return;}
   if(BIZ[pg]){renderBiz(m,pg);return;}
   renderHome(m);
@@ -1345,13 +1364,13 @@ function renderConfig(el){
     <div class="sec-lbl">Dados e progresso</div>
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin:10px 0 16px">
       <button class="btn btn-g" onclick="exportData()">📥 Exportar progresso</button>
-      <button class="btn btn-danger" onclick="if(confirm('Resetar tudo?')&&confirm('Confirme novamente.')){localStorage.removeItem('mrc10');location.reload();}">⚠ Resetar tudo</button>
+      <button class="btn btn-danger" onclick="if(confirm('Resetar tudo?')&&confirm('Confirme novamente.')){localStorage.removeItem('mrc11');location.reload();}">⚠ Resetar tudo</button>
     </div>
     <div style="background:var(--card2);border-radius:9px;padding:14px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--t3);line-height:2">
       XP: ${st.xp} · Nível: ${lvl().n}<br>
       Ações concluídas: ${Object.keys(st.taskDone).filter(k=>st.taskDone[k]).length}<br>
       Entregas: ${Object.values(st.deliveries).flatMap(Object.values).filter(Boolean).length}<br>
-      MRC OS v10 · 2025
+      MRC OS v11 · 2025
     </div>
   </div>
   </div>`;
@@ -1369,6 +1388,663 @@ function exportData(){
 applyT('home');
 updateTop();
 render();
+
+/* ═══════════════════════════════════════════════════
+   AMAZONIA PLATFORM PAGE
+═══════════════════════════════════════════════════ */
+const AZ_DATA=[
+  {id:'az1',title:'Fundação Estratégica',icon:'🧭',tasks:[
+    {id:'az1t1',xp:120,p:'critical',est:'90min',t:'Proposta de Valor — Documento Fundador',
+     inst:'Escreva o documento fundador da AmazonIA Intelligence Platform (via NextLevel Mktg Ltda, CNPJ 51.392.006/0001-92, Berrini 1681, SP, CNAE 6202-3/00).\n\n1. Tagline EN (máx 12 palavras)\n2. Problema: lacuna de inteligência sobre minerais críticos amazônicos\n3. Solução: SaaS cruzando dados ANM/SIGMINE, IBAMA e preços internacionais\n4. Diferencial: sem concorrente no Brasil, USD pricing\n5. Mercados excluídos: China\n\nResultado: 1 página PT + EN'},
+    {id:'az1t2',xp:100,p:'high',est:'60min',t:'Mapa de Stakeholders — 20 Organizações',
+     inst:'Planilha Airtable: MME, ANM, DFC (EUA), JOGMEC (Japão), BGR (Alemanha), prefeituras mineradoras PA/AM.\nCampos: nome, tipo, decisor, email, relevância 1-5, temperatura, próxima ação'},
+    {id:'az1t3',xp:150,p:'high',est:'3h',t:'Deck de Pitch — 12 Slides PT + EN',
+     inst:'Crie no Canva. Grave PT no estúdio → dubbe EN via HeyGen + ElevenLabs.\nSlides: Capa · Problema · Solução · TAM/SAM/SOM · Modelo SaaS USD · Tração IDESA · Diferencial · Roadmap 18m · Time · Parceiros · Ask · Contato'},
+  ]},
+  {id:'az2',title:'MVP SaaS No-Code',icon:'⚙️',tasks:[
+    {id:'az2t1',xp:140,p:'critical',est:'4h',t:'Especificação Técnica via No-Code',
+     inst:'MVP: Airtable + Softr + Make + n8n\n1. Mapa interativo de ocorrências minerais (ANM/SIGMINE)\n2. Banco de projetos com status regulatório\n3. Dashboard preços: lítio, nióbio, terras raras, cobre\n4. Relatórios PDF exportáveis com branding\n5. Newsletter Mineral Brief via Beehiiv (US$49/mês)'},
+    {id:'az2t2',xp:180,p:'high',est:'6h',t:'Integração ANM — SIGMINE Dados Abertos',
+     inst:'Via Make.com ou n8n (sem código):\n1. Webhook: processos minerários ativos na Amazônia Legal\n2. Filtro: lítio, nióbio, ouro, cobre, manganês, terras raras\n3. Airtable: processo ANM, mineral, município, estado, fase, empresa, área (ha)\n4. Atualização semanal automática'},
+    {id:'az2t3',xp:160,p:'normal',est:'5h',t:'Protótipo Navegável — Framer ou Softr',
+     inst:'3 telas:\n- Home/Mapa: pins por mineral, painel de atualizações regulatórias\n- Detalhe do Projeto: ficha ANM completa\n- Analytics: preços históricos, alertas de oportunidade\nMeta: demonstração para MME e ANM em 2 semanas'},
+  ]},
+  {id:'az3',title:'Go-to-Market Internacional',icon:'🚀',tasks:[
+    {id:'az3t1',xp:200,p:'critical',est:'3h',t:'10 Clientes Beta — Outreach EN LinkedIn',
+     inst:'Perfis-alvo: consultorias mineração EUA/Canadá, fundos ESG + critical minerals (DFC), secretarias PA/AM, mineradoras júnior listadas em Toronto/Sydney.\nPara cada: LinkedIn do decisor, mensagem EN via Claude, proposta de valor em 3 linhas.'},
+    {id:'az3t2',xp:120,p:'high',est:'2h',t:'Precificação USD — 3 Planos SaaS',
+     inst:'Starter US$290/mês · Professional US$890/mês · Enterprise US$2.900/mês\nComparar: S&P Global ~US$5k/mês, Wood Mackenzie ~US$3k/mês\nDesconto 40-90%. ROI por perfil de cliente.'},
+    {id:'az3t3',xp:100,p:'high',est:'2h',t:'Canal LinkedIn — Estratégia EN',
+     inst:'Fluxo estúdio Berrini: 1. Grave PT → 2. Transcreva Whisper → 3. Traduza Claude → 4. Dubbe HeyGen/ElevenLabs → 5. Publique EN\n3x texto/semana · 2x vídeo 60s · 1x carrossel · 1x newsletter Mineral Brief'},
+  ]},
+  {id:'az4',title:'Captação Institucional',icon:'💰',tasks:[
+    {id:'az4t1',xp:150,p:'high',est:'3h',t:'BNDES + Finep — Linhas para Startups de Dados',
+     inst:'BNDES Garagem: até R$1M não-reembolsável\nFinep Startup: até R$2M, inovação tecnológica\nBNDES BK Inovação: até R$10M, CNAE 6202 elegível\nNextLevel (CNPJ 51.392.006/0001-92) aberta 12/07/2023 — verificar tempo mínimo por linha.'},
+    {id:'az4t2',xp:200,p:'high',est:'4h',t:'DFC — Expressão de Interesse (EOI)',
+     inst:'dfc.gov → Apply for Financing → EOI\nSeção: "Data & Digital Infrastructure" ou "Critical Minerals"\nArgumento: AmazonIA preenche gap de inteligência para investimento americano seguro no setor mineral amazônico.\nCitar: MoU EUA-Brasil Critical Minerals (2023), lítio e nióbio amazônicos.'},
+  ]},
+];
+
+const ID_DATA=[
+  {id:'id1',title:'Captação Internacional — Editais',icon:'🌍',tasks:[
+    {id:'id1t1',xp:250,p:'critical',est:'8h',t:'Fundo Clima BNDES — Candidatura 2025/2026',
+     inst:'IDESA-MRS: CNPJ 04.460.065/0001-70 | Fundado 17/05/2001 | Rod. PA-140 Km 29, Santo Antônio do Tauá/PA | Associação Privada | Mapa das OSC\n\n⚠️ BLOQUEIO CRÍTICO: Diretoria vencida — regularize antes da submissão.\n\nFundo Clima R$27 bilhões para 2026. Valor indicativo: R$500k–R$2M/projeto.'},
+    {id:'id1t2',xp:220,p:'high',est:'6h',t:'GIZ Brasil — Proposta Mineração Responsável',
+     inst:'giz-brasil.org.br | +55 61 3362-1800\nProposta 5 páginas PT (depois EN e DE via IA):\n1. IDESA-MRS (23 anos, PA, Mapa das OSC)\n2. Problema: governança frágil em territórios tradicionais\n3. Metodologia: 200 lideranças via ecossistema IDESA\n4. Resultados: 20 municípios com planos em 18 meses\n5. Orçamento: €200–350k\nAssinar: Mauricio Ramos dos Santos Junior, Presidente'},
+    {id:'id1t3',xp:180,p:'normal',est:'3h',t:'JICA Brasil — Minerais Críticos e Bioeconomia',
+     inst:'jica.go.jp/brazil · Escritório Brasília\n1. Pesquise projetos ativos Brasil (mineral/ambiental)\n2. Identifique Representante Técnico\n3. Email EN: IDESA 23 anos + proposta lítio PA\n4. Propor missão técnica japonesa ao Pará com apoio logístico IDESA'},
+    {id:'id1t4',xp:200,p:'high',est:'4h',t:'Bezos Earth Fund — Submissão de Conceito',
+     inst:'bezosearthfund.org → Apply\nTítulo: "Amazon Mineral Intelligence for Community-Based Conservation"\nProblema: Mineração ilegal avança sem dados acessíveis\nSolução: IDESA capacita 200 lideranças como monitores usando dados AmazonIA\nImpacto: 50 territórios mapeados, 3M ha com monitoramento\nValor: US$500k–US$1,5M'},
+  ]},
+  {id:'id2',title:'Regularização Institucional',icon:'📋',tasks:[
+    {id:'id2t1',xp:180,p:'critical',est:'3h',t:'⚠️ Renovação da Diretoria — Assembleia Geral',
+     inst:'BLOQUEIO CRÍTICO: Diretoria vencida impede editais, contas e convênios.\n\n1. Convoque AGE (8 dias antecedência conforme estatuto 2001)\n2. Pauta: eleição Presidente + Vice + Secretário + Tesoureiro + Conselho Fiscal\n3. Lavre Ata com assinaturas\n4. Registre no Cartório de Santo Antônio do Tauá/PA\n5. Atualize Mapa das OSC e CNPJ\n\nMauricio como Presidente: inclua cargo e CPF na ATA.'},
+    {id:'id2t2',xp:140,p:'high',est:'4h',t:'Estatuto — Atualização 2025',
+     inst:'Mudanças obrigatórias no estatuto de 2001:\n1. Objeto social: inteligência mineral, tecnologia ambiental, bioeconomia\n2. Membros regionais voluntários como categoria formal\n3. Alinhamento ODS/Agenda 2030\n4. Previsão de atividades comerciais subsidiárias\n5. Base para contratar NextLevel sem licitação\nUse Claude para redigir. Revisar com advogado OSC (R$800–1.500).'},
+    {id:'id2t3',xp:100,p:'high',est:'2h',t:'Certidões Negativas e Regularidade Fiscal',
+     inst:'1. CND Federal: certidao.receita.fazenda.gov.br\n2. CND Estadual PA: sefa.pa.gov.br\n3. CNIS atualizado\n4. Declaração de Utilidade Pública (verificar vigência PA)\n5. OSCIP: verificar se tem ou vale solicitar\n\nOrganizar: Google Drive "IDESA / Documentação Regularização 2025"'},
+  ]},
+  {id:'id3',title:'Ecossistema de Conhecimento',icon:'🌿',tasks:[
+    {id:'id3t1',xp:140,p:'high',est:'3h',t:'Plataforma de Cursos — Hotmart ou Kiwify',
+     inst:'Produtos:\n1. Comunidade Mensal — R$97/mês (conteúdo básico + grupo)\n2. Comunidade Avançada — R$197/mês (conteúdo avançado + lives)\n3. Formação Agentes Territoriais — R$1.900 (40h, turma 20)\n4. Mentoria Intensiva — R$3.500 (6 semanas, grupos 8)\n\nMembros formação avançada = Representantes Regionais Voluntários.\nMeta: 200 membros = R$20–40k/mês. Lançar ANTES da renovação da diretoria.'},
+    {id:'id3t2',xp:160,p:'high',est:'4h',t:'Recrutar 20 Membros Regionais Voluntários',
+     inst:'Perfil: pesquisadores UFPA/UFAM/UFRR, técnicos de secretarias, lideranças extrativistas, advogados ambientalistas.\nRecrutamento: post LinkedIn/Instagram, form Airtable\nBenefícios: acesso gratuito cursos, certificado IDESA, rede nacional\nCompromisso: 4h/mês\nMeta: 1 representante por estado amazônico (PA,AM,RR,AP,AC,RO,MT,TO,MA)'},
+    {id:'id3t3',xp:200,p:'high',est:'8h',t:'Relatório Técnico Anual IDESA 2024',
+     inst:'Estrutura (redigir com Claude):\n1. Resumo Executivo (1 pág)\n2. Contexto: 23 anos, Mapa das OSC\n3. Atividades 2024: projetos, eventos, publicações, parcerias\n4. Indicadores: pessoas, territórios, municípios\n5. Parcerias: IDESA ↔ NextLevel/AmazonIA\n6. Perspectivas 2025–2026\n7. Demonstrativo Financeiro\nFormato: PDF 20 págs com infográficos (Canva). PT + EN via IA.'},
+    {id:'id3t4',xp:120,p:'normal',est:'3h',t:'Podcast Semanal — Setup no Estúdio',
+     inst:'Setup Berrini: USB (Focusrite Scarlett) + microfone condensador + Descript\nDistribuição: Spotify for Podcasters + Apple Podcasts + Beehiiv\nFluxo: 1. Grava PT (30-40min) → 2. Descript edita → 3. Claude gera show notes → 4. ElevenLabs versão EN → 5. Publica ambos'},
+  ]},
+  {id:'id4',title:'Modelo Duplo IDESA ↔ NextLevel',icon:'🔗',tasks:[
+    {id:'id4t1',xp:160,p:'high',est:'3h',t:'Formalizar Contrato IDESA → NextLevel',
+     inst:'BASE JURÍDICA: OSCs não integram Administração Pública (STF ADI 1.923). IDESA pode contratar NextLevel diretamente.\n\nContrato:\n1. Contratante: IDESA-MRS (CNPJ 04.460.065/0001-70)\n2. Contratada: NextLevel Mktg Ltda (CNPJ 51.392.006/0001-92, Berrini 1681, SP)\n3. Objeto: software (CNAE 6202-3/00) + marketing digital\n4. Remuneração: 15–25% do valor líquido dos projetos\n5. Prazo: 12 meses renováveis\n\nFLUXO: Fundo Internacional → IDESA → NextLevel → Mauricio PJ Simples (~6%)'},
+    {id:'id4t2',xp:100,p:'normal',est:'2h',t:'Documentar Modelo de Negócio Duplo',
+     inst:'Documento 1 pág (interno + investidores):\nIDESA: capta recursos internacionais sem fins lucrativos\nNextLevel/AmazonIA: SaaS USD + recebe contratos IDESA\nSINERGIA: dados dos projetos IDESA alimentam plataforma AmazonIA. Rede regional IDESA = inteligência para clientes Enterprise.'},
+  ]},
+];
+
+const BRANDS=['NextLevel','Brás Digital','ViiTss','Alpha Outfit','Cusi Modas','AmazonIA','IDESA','Mauricio Pessoal'];
+const BRAND_CLR={'NextLevel':'#E8A820','Brás Digital':'#F97316','ViiTss':'#EC4899','Alpha Outfit':'#06B6D4','Cusi Modas':'#10B981','AmazonIA':'#F59E0B','IDESA':'#16A854','Mauricio Pessoal':'#A855F7'};
+const PLATS_SOCIAL=['Instagram','TikTok','LinkedIn','YouTube','X/Twitter'];
+const POST_STATUS=['Ideia','Rascunho','Gravado','Editado','Publicado'];
+const PST_CLR={'Ideia':'#6B7280','Rascunho':'#F59E0B','Gravado':'#3B82F6','Editado':'#A855F7','Publicado':'#16A854'};
+const ADS_PLATS=['Meta Ads','Google Ads','TikTok Ads'];
+const ADS_CLIENTS=['Alpha Outfit','ViiTss','Cusi Modas','NextLevel Agência','Brás Digital'];
+
+// Init production data if empty
+if(!st.posts){st.posts=[];}
+if(!st.videos){st.videos=[];}
+if(!st.adsCampaigns){st.adsCampaigns=[];}
+if(!st.posts.length){
+  const days=['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
+  const now=new Date(),dow=now.getDay();
+  const samples=[
+    {brand:'ViiTss',plat:'TikTok',status:'Gravado',title:'Chegada de nova coleção — unboxing'},
+    {brand:'Alpha Outfit',plat:'Instagram',status:'Ideia',title:'Jersey retrô: top 5 de todos os tempos'},
+    {brand:'NextLevel',plat:'LinkedIn',status:'Rascunho',title:'Case: como ViiTss chegou a R$600k/mês'},
+    {brand:'AmazonIA',plat:'LinkedIn',status:'Ideia',title:'O que são minerais críticos amazônicos?'},
+    {brand:'Brás Digital',plat:'Instagram',status:'Ideia',title:'Fornecedores chineses chegam ao Brás'},
+    {brand:'IDESA',plat:'YouTube',status:'Ideia',title:'23 anos de IDESA — história e missão'},
+    {brand:'Mauricio Pessoal',plat:'Instagram',status:'Ideia',title:'Apresentação — quem sou, o que construo'},
+  ];
+  samples.forEach((s,i)=>{
+    const d=new Date(now);d.setDate(now.getDate()-dow+i+1);
+    st.posts.push({id:'p'+i,date:d.toISOString().slice(0,10),dayLabel:days[i],...s,checks:{roteiro:false,gravado:false,editado:false,thumb:false,legenda:false,publicado:false}});
+  });
+}
+if(!st.videos.length){
+  st.videos=[
+    {id:'v1',brand:'ViiTss',plat:'TikTok',title:'Chegada de nova coleção',status:'Gravado',briefing:'Mostrar produtos chegando, reação animada, CTA para loja',duration:'60s',priority:'high',checks:{corte:false,legenda:false,thumb:false,dubagemEN:false,publicado:false}},
+    {id:'v2',brand:'Alpha Outfit',plat:'Instagram',title:'Top 5 jerseys retrô de 2025',status:'Editar',briefing:'Ranking com storytelling de cada clube',duration:'90s',priority:'normal',checks:{corte:false,legenda:false,thumb:false,dubagemEN:false,publicado:false}},
+    {id:'v3',brand:'AmazonIA',plat:'LinkedIn',title:'O que são minerais críticos amazônicos?',status:'Ideia',briefing:'Explicar em 60s: o que são, onde estão, por que o mundo precisa',duration:'60s',priority:'high',checks:{corte:false,legenda:false,thumb:false,dubagemEN:false,publicado:false}},
+    {id:'v4',brand:'NextLevel',plat:'Instagram',title:'Case ViiTss — R$600k/mês TikTok Shop',status:'Gravado',briefing:'Estratégia, produção, resultados — prova social para mentorias',duration:'90s',priority:'high',checks:{corte:false,legenda:false,thumb:false,dubagemEN:false,publicado:false}},
+    {id:'v5',brand:'IDESA',plat:'YouTube',title:'23 anos de IDESA — depoimento',status:'Ideia',briefing:'Por que fundei, o que construímos, próximos passos',duration:'5min',priority:'normal',checks:{corte:false,legenda:false,thumb:false,dubagemEN:false,publicado:false}},
+  ];
+}
+if(!st.adsCampaigns.length){
+  st.adsCampaigns=[
+    {id:'ad1',client:'Alpha Outfit',plat:'Meta Ads',status:'Ativa',budget:500,spend:320,goal:'Leads WhatsApp',ctr:2.1,cpl:18,conv:17,checks:{criativo:true,campanha:true,relatorio:false,otimizacao:false}},
+    {id:'ad2',client:'ViiTss',plat:'Meta Ads',status:'Pausada',budget:0,spend:0,goal:'Tráfego site',ctr:0,cpl:0,conv:0,checks:{criativo:false,campanha:false,relatorio:false,otimizacao:false}},
+    {id:'ad3',client:'Alpha Outfit',plat:'Google Ads',status:'Proposta',budget:0,spend:0,goal:'Search compradores jersey',ctr:0,cpl:0,conv:0,checks:{criativo:false,campanha:false,relatorio:false,otimizacao:false}},
+    {id:'ad4',client:'NextLevel Agência',plat:'Meta Ads',status:'Planejada',budget:500,spend:0,goal:'Leads agência',ctr:0,cpl:0,conv:0,checks:{criativo:false,campanha:false,relatorio:false,otimizacao:false}},
+    {id:'ad5',client:'ViiTss',plat:'TikTok Ads',status:'Proposta',budget:0,spend:0,goal:'TikTok Shop vendas',ctr:0,cpl:0,conv:0,checks:{criativo:false,campanha:false,relatorio:false,otimizacao:false}},
+  ];
+}
+
+/* ═══════════════════════════════════════════════════
+   AMAZONIA PLATFORM RENDER
+═══════════════════════════════════════════════════ */
+function renderAmazonIA(el){
+  const tasks=AZ_DATA.flatMap(p=>p.tasks);
+  const done=tasks.filter(t=>st.taskDone[t.id]).length;
+  const pct=Math.round(done/Math.max(tasks.length,1)*100);
+  const crits=tasks.filter(t=>!st.taskDone[t.id]&&t.p==='critical').length;
+  let h=`<div class="pw fade">
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:6px">
+    <div>
+      <div class="ph">🌎 AmazonIA Intelligence Platform</div>
+      <div class="psub">NextLevel Marketing Ltda · CNPJ 51.392.006/0001-92 · Berrini 1681, SP · CNAE 6202-3/00</div>
+      <div style="font-size:11px;color:#F59E0B;margin-top:2px">Precificação USD: US$290 / US$890 / US$2.900/mês · Mercados: EUA, Japão, Alemanha, Canadá · Sem concorrente no Brasil</div>
+    </div>
+    <div style="text-align:right"><div style="font-size:32px;font-weight:800;color:#F59E0B;font-family:'JetBrains Mono',monospace">${pct}%</div><div class="dimx">${done}/${tasks.length} ações</div></div>
+  </div>
+  <div class="bar bar-lg" style="margin-bottom:13px"><div class="bar-f" style="width:${pct}%;background:#F59E0B"></div></div>
+  ${crits?`<div style="background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.18);border-radius:9px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#EF4444;font-weight:600">🔴 ${crits} ação${crits>1?'ões':''} crítica${crits>1?'s':''} pendente${crits>1?'s':''}</div>`:''}`;
+  AZ_DATA.forEach(ph=>{
+    const phDone=ph.tasks.filter(t=>st.taskDone[t.id]).length;
+    const phPct=Math.round(phDone/ph.tasks.length*100);
+    h+=`<div class="card" style="margin-bottom:10px">
+      <div style="display:flex;align-items:center;gap:10px;cursor:pointer" onclick="togglePh(this,'azph_${ph.id}')">
+        <span style="font-size:18px">${ph.icon}</span>
+        <div style="flex:1"><div style="font-size:14px;font-weight:700">${ph.title}</div><div class="dimx">${phDone}/${ph.tasks.length} concluídas</div></div>
+        <div style="width:80px"><div class="bar"><div class="bar-f" style="width:${phPct}%;background:#F59E0B"></div></div></div>
+        <span class="phArr" style="color:var(--t3);font-size:11px">▼</span>
+      </div>
+      <div id="azph_${ph.id}" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--b)">`;
+    ph.tasks.forEach(t=>{
+      const done=!!st.taskDone[t.id];
+      const pc=t.p==='critical'?'#EF4444':t.p==='high'?'#E8A820':'rgba(255,255,255,.3)';
+      h+=`<div style="background:var(--card2);border:1px solid var(--b);border-left:3px solid ${done?'#16A854':pc};border-radius:var(--rs);padding:12px;margin-bottom:8px;opacity:${done?.42:1};cursor:pointer" onclick="tgTask('${t.id}',${t.xp},'az')">
+        <div style="display:flex;align-items:flex-start;gap:9px">
+          <span style="font-size:13px;flex-shrink:0;margin-top:1px">${done?'✅':'○'}</span>
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:600;text-decoration:${done?'line-through':'none'};color:${done?'var(--t2)':'var(--t1)'}">${t.t}</div>
+            <div style="display:flex;gap:6px;margin-top:5px;flex-wrap:wrap">
+              <span style="font-size:9px;background:rgba(${done?'22,168,84':t.p==='critical'?'239,68,68':'232,168,32'},.12);color:${done?'#16A854':pc};padding:2px 7px;border-radius:5px;font-weight:700;font-family:'JetBrains Mono',monospace">${done?'✓ feito':t.p}</span>
+              <span class="dimx">⏱ ${t.est}</span>
+              <span class="dimx">⚡ ${t.xp} XP</span>
+            </div>
+            ${!done?`<div style="font-size:11px;color:var(--t3);margin-top:8px;line-height:1.6;white-space:pre-wrap">${t.inst}</div>`:''}
+          </div>
+          ${!done?`<button class="btn btn-g" style="padding:4px 9px;font-size:11px;flex-shrink:0" onclick="event.stopPropagation();tmrStart('${t.t.replace(/'/g,"\\'")}');go('timer')">▶</button>`:''}
+        </div>
+      </div>`;
+    });
+    h+='</div></div>';
+  });
+  h+='</div>';
+  el.innerHTML=h;
+}
+
+/* ═══════════════════════════════════════════════════
+   IDESA PAGE
+═══════════════════════════════════════════════════ */
+function renderIDESA(el){
+  const tasks=ID_DATA.flatMap(p=>p.tasks);
+  const done=tasks.filter(t=>st.taskDone[t.id]).length;
+  const pct=Math.round(done/Math.max(tasks.length,1)*100);
+  const crits=tasks.filter(t=>!st.taskDone[t.id]&&t.p==='critical').length;
+  let h=`<div class="pw fade">
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:6px">
+    <div>
+      <div class="ph">🌿 IDESA-MRS</div>
+      <div class="psub">Instituto de Desenvolvimento Econômico e Socioambiental da Amazônia</div>
+      <div style="font-size:11px;color:#16A854;margin-top:2px">CNPJ 04.460.065/0001-70 · Fundado 17/05/2001 · Rod. PA-140 Km 29, Santo Antônio do Tauá/PA · Mapa das OSC</div>
+      <div style="font-size:11px;color:#EF4444;margin-top:2px;font-weight:600">⚠️ Presidente: Mauricio Ramos dos Santos Junior · Diretoria VENCIDA — regularizar urgente</div>
+    </div>
+    <div style="text-align:right"><div style="font-size:32px;font-weight:800;color:#16A854;font-family:'JetBrains Mono',monospace">${pct}%</div><div class="dimx">${done}/${tasks.length} ações</div></div>
+  </div>
+  <div class="bar bar-lg" style="margin-bottom:13px"><div class="bar-f" style="width:${pct}%;background:#16A854"></div></div>
+  ${crits?`<div style="background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.18);border-radius:9px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#EF4444;font-weight:600">🔴 ${crits} bloqueio${crits>1?'s':''} crítico${crits>1?'s':''} — resolver primeiro</div>`:''}`;
+  ID_DATA.forEach(ph=>{
+    const phDone=ph.tasks.filter(t=>st.taskDone[t.id]).length;
+    const phPct=Math.round(phDone/ph.tasks.length*100);
+    h+=`<div class="card" style="margin-bottom:10px">
+      <div style="display:flex;align-items:center;gap:10px;cursor:pointer" onclick="togglePh(this,'idph_${ph.id}')">
+        <span style="font-size:18px">${ph.icon}</span>
+        <div style="flex:1"><div style="font-size:14px;font-weight:700">${ph.title}</div><div class="dimx">${phDone}/${ph.tasks.length} concluídas</div></div>
+        <div style="width:80px"><div class="bar"><div class="bar-f" style="width:${phPct}%;background:#16A854"></div></div></div>
+        <span class="phArr" style="color:var(--t3);font-size:11px">▼</span>
+      </div>
+      <div id="idph_${ph.id}" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--b)">`;
+    ph.tasks.forEach(t=>{
+      const done=!!st.taskDone[t.id];
+      const pc=t.p==='critical'?'#EF4444':t.p==='high'?'#E8A820':'rgba(255,255,255,.3)';
+      h+=`<div style="background:var(--card2);border:1px solid var(--b);border-left:3px solid ${done?'#16A854':pc};border-radius:var(--rs);padding:12px;margin-bottom:8px;opacity:${done?.42:1};cursor:pointer" onclick="tgTask('${t.id}',${t.xp},'id')">
+        <div style="display:flex;align-items:flex-start;gap:9px">
+          <span style="font-size:13px;flex-shrink:0;margin-top:1px">${done?'✅':'○'}</span>
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:600;text-decoration:${done?'line-through':'none'};color:${done?'var(--t2)':'var(--t1)'}">${t.t}</div>
+            <div style="display:flex;gap:6px;margin-top:5px;flex-wrap:wrap">
+              <span style="font-size:9px;background:rgba(${done?'22,168,84':t.p==='critical'?'239,68,68':'232,168,32'},.12);color:${done?'#16A854':pc};padding:2px 7px;border-radius:5px;font-weight:700;font-family:'JetBrains Mono',monospace">${done?'✓ feito':t.p}</span>
+              <span class="dimx">⏱ ${t.est}</span><span class="dimx">⚡ ${t.xp} XP</span>
+            </div>
+            ${!done?`<div style="font-size:11px;color:var(--t3);margin-top:8px;line-height:1.6;white-space:pre-wrap">${t.inst}</div>`:''}
+          </div>
+          ${!done?`<button class="btn btn-g" style="padding:4px 9px;font-size:11px;flex-shrink:0" onclick="event.stopPropagation();tmrStart('${t.t.replace(/'/g,"\\'")}');go('timer')">▶</button>`:''}
+        </div>
+      </div>`;
+    });
+    h+='</div></div>';
+  });
+  h+='</div>';
+  el.innerHTML=h;
+}
+
+function tgTask(tid,xp,pg_){
+  st.taskDone[tid]=!st.taskDone[tid];
+  st.xp+=st.taskDone[tid]?xp:-xp;
+  st.xp=Math.max(0,st.xp);
+  save();updateTop();
+  if(pg_==='az')renderAmazonIA(document.getElementById('main'));
+  else renderIDESA(document.getElementById('main'));
+}
+
+function togglePh(hdr,contentId){
+  const c=document.getElementById(contentId);if(!c)return;
+  const open=c.style.display==='block';
+  c.style.display=open?'none':'block';
+  const arr=hdr.querySelector('.phArr');
+  if(arr)arr.textContent=open?'▼':'▲';
+}
+
+/* ═══════════════════════════════════════════════════
+   ENTIDADES PAGE
+═══════════════════════════════════════════════════ */
+function renderEntidades(el){
+  el.innerHTML=`<div class="pw fade">
+  <div class="ph" style="margin-bottom:4px">🏛️ Entidades &amp; Modelo Duplo</div>
+  <div class="psub" style="margin-bottom:20px">Estrutura jurídica completa e modelo de negócio consolidado</div>
+
+  <div class="card" style="margin-bottom:16px;border-left:3px solid #7C3AED">
+    <div class="lbl" style="color:#7C3AED;margin-bottom:10px">🔗 Modelo de Negócio Duplo</div>
+    <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;margin-bottom:14px">
+      <div style="background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.18);border-radius:var(--rs);padding:14px">
+        <div style="font-size:11px;font-weight:700;color:#F59E0B;margin-bottom:6px">🌎 NextLevel / AmazonIA</div>
+        <div class="dimx" style="line-height:1.8">Vende SaaS em USD<br>Recebe contratos do IDESA<br>Tributação Simples ~6%</div>
+      </div>
+      <div style="text-align:center"><div style="font-size:20px">↔️</div><div style="font-size:9px;font-weight:700;color:var(--t3);margin-top:4px;line-height:1.5">STF ADI 1.923<br>sem licitação</div></div>
+      <div style="background:rgba(22,168,84,.07);border:1px solid rgba(22,168,84,.18);border-radius:var(--rs);padding:14px">
+        <div style="font-size:11px;font-weight:700;color:#16A854;margin-bottom:6px">🌿 IDESA-MRS</div>
+        <div class="dimx" style="line-height:1.8">Capta recursos internacionais<br>Executa projetos de impacto<br>Contrata NextLevel diretamente</div>
+      </div>
+    </div>
+    <div style="background:var(--card2);border-radius:var(--rs);padding:12px;font-size:12px;color:var(--t2);line-height:1.8">
+      <strong style="color:#F59E0B">Fluxo financeiro:</strong> Fundo Internacional → IDESA → contrata NextLevel → Mauricio recebe como PJ Simples (~6%)<br>
+      <strong style="color:#16A854">Sinergia de dados:</strong> Projetos IDESA geram dados que alimentam plataforma AmazonIA. Rede regional IDESA = inteligência para clientes Enterprise.<br>
+      <strong style="color:#7C3AED">Base jurídica:</strong> OSCs não integram Administração Pública (STF ADI 1.923) — contratação direta sem licitação.
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+    ${[
+      {name:'NextLevel Marketing Ltda',nick:'AmazonIA Intelligence Platform',c:'#F59E0B',icon:'🌎',fields:[
+        ['CNPJ','51.392.006/0001-92'],['Abertura','12/07/2023'],
+        ['Nome Fantasia','Grupo Mauricio Soluções Digitais'],
+        ['Endereço','Av. Eng. Luiz Carlos Berrini 1681, Conj. 1111, São Paulo/SP'],
+        ['CNAE Principal','6202-3/00 — Software customizável'],
+        ['Regime Tributário','Simples Nacional (~6%)'],
+        ['Produto','SaaS inteligência minerais críticos amazônicos'],
+        ['Precificação','US$290 / US$890 / US$2.900/mês'],
+        ['Mercados','EUA, Brasil, Japão, Alemanha, Canadá'],
+        ['Produção','Estúdio SP (PT) → IA (EN): HeyGen + ElevenLabs'],
+        ['Newsletter','Mineral Brief via Beehiiv (US$49/mês)'],
+      ],notes:['Sem concorrente direto no Brasil neste nicho','CNAE 6202 elegível para BNDES/Finep','Contratada diretamente pelo IDESA (STF ADI 1.923)']},
+      {name:'IDESA-MRS',nick:'Instituto de Desenvolvimento Econômico e Socioambiental da Amazônia',c:'#16A854',icon:'🌿',fields:[
+        ['CNPJ','04.460.065/0001-70'],['Fundação','17/05/2001'],
+        ['Natureza Jurídica','Associação Privada'],
+        ['Sede','Rod. PA-140 Km 29, Zona Rural, Santo Antônio do Tauá/PA'],
+        ['Registro Federal','Mapa das OSC'],
+        ['Presidente','Mauricio Ramos dos Santos Junior'],
+        ['⚠️ Situação Diretoria','VENCIDA — renovação pendente (bloqueio crítico)'],
+        ['Ecossistema','Cursos R$97–197/mês + Formação R$1.900–3.500'],
+        ['Meta Membros','200 mensalistas = R$20–40k/mês recorrente'],
+        ['Captação','Fundo Clima R$27B, GIZ, JICA, Bezos Earth Fund, BID Lab'],
+        ['Canal','YouTube + LinkedIn + Podcast PT e EN'],
+      ],notes:['23 anos de atuação amazônica = credencial única para editais','Pode contratar NextLevel sem licitação (STF ADI 1.923)','Diretoria vencida é o único bloqueio — prioridade máxima']},
+    ].map(e=>`
+      <div style="background:var(--card);border:1px solid var(--b);border-left:3px solid ${e.c};border-radius:var(--r);overflow:hidden">
+        <div style="padding:14px 18px;border-bottom:1px solid var(--b);display:flex;align-items:center;gap:10px">
+          <span style="font-size:20px">${e.icon}</span>
+          <div><div style="font-size:14px;font-weight:800;color:${e.c}">${e.name}</div><div class="dimx">${e.nick}</div></div>
+        </div>
+        <div style="padding:14px 18px">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;margin-bottom:12px">
+            ${e.fields.map(([k,v])=>`<div><div style="font-size:9px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:2px">${k}</div>
+              <div style="font-size:12px;color:${k.startsWith('⚠️')?'#EF4444':'var(--t1)'};font-weight:${k.startsWith('⚠️')?700:400};font-family:${['CNPJ','Abertura','Fundação'].includes(k)?'JetBrains Mono,monospace':'inherit'}">${v}</div></div>`).join('')}
+          </div>
+          <div style="border-top:1px solid var(--b);padding-top:10px">
+            ${e.notes.map(n=>`<div style="font-size:11px;color:var(--t2);display:flex;gap:7px;margin-bottom:5px"><span style="color:${e.c};flex-shrink:0">→</span>${n}</div>`).join('')}
+          </div>
+        </div>
+      </div>`).join('')}
+  </div>
+  </div>`;
+}
+
+/* ═══════════════════════════════════════════════════
+   REDES SOCIAIS
+═══════════════════════════════════════════════════ */
+function renderSocial(el){
+  if(!st._sBrand)st._sBrand='Todos';
+  const brands=['Todos',...BRANDS];
+  const filt=st.posts.filter(p=>st._sBrand==='Todos'||p.brand===st._sBrand);
+  let h=`<div class="pw fade">
+  <div class="ph" style="margin-bottom:4px">📱 Redes Sociais</div>
+  <div class="psub" style="margin-bottom:14px">Calendário editorial, status de produção e checklist por marca</div>
+  <div style="display:flex;align-items:center;gap:7px;margin-bottom:14px;flex-wrap:wrap">
+    <span class="dimx">Marca:</span>
+    ${brands.map(b=>`<button onclick="st._sBrand='${b}';save();renderSocial(document.getElementById('main'))" style="font-size:11px;padding:4px 11px;border-radius:7px;border:none;cursor:pointer;font-family:inherit;font-weight:600;background:${st._sBrand===b?BRAND_CLR[b]||T.a:'rgba(255,255,255,.07)'};color:${st._sBrand===b?'#07070D':'var(--t2)'}">${b}</button>`).join('')}
+    <button onclick="openPostModal()" style="font-size:11px;padding:4px 12px;border-radius:7px;border:none;cursor:pointer;font-family:inherit;font-weight:700;background:${T.a};color:#07070D;margin-left:auto">+ Post</button>
+  </div>
+
+  <div style="display:flex;gap:9px;overflow-x:auto;padding-bottom:6px;margin-bottom:18px">
+    ${POST_STATUS.map(s=>{
+      const ps=filt.filter(p=>p.status===s);
+      const sc=PST_CLR[s];
+      return `<div style="flex:1;min-width:170px">
+        <div style="padding:7px 11px;border-radius:var(--rs) var(--rs) 0 0;border:1px solid var(--b);border-bottom:none;font-size:9px;font-weight:700;color:${sc};background:rgba(255,255,255,.02);display:flex;justify-content:space-between"><span>${s}</span><span style="color:var(--t3)">${ps.length}</span></div>
+        <div style="border:1px solid var(--b);border-radius:0 0 var(--rs) var(--rs);padding:7px;min-height:90px;background:rgba(255,255,255,.01)">
+          ${ps.map(p=>`<div style="background:var(--card);border:1px solid var(--b);border-left:3px solid ${BRAND_CLR[p.brand]||'#6B7280'};border-radius:6px;padding:8px 10px;margin-bottom:6px;cursor:pointer" onclick="openEditPost('${p.id}')">
+            <div style="font-size:9px;font-weight:700;color:${BRAND_CLR[p.brand]||'#6B7280'};margin-bottom:3px">${p.brand} · ${p.plat}</div>
+            <div style="font-size:11px;font-weight:600;line-height:1.35;margin-bottom:3px">${p.title}</div>
+            <div class="dimx">${p.date}</div>
+          </div>`).join('')||`<div class="dimx" style="text-align:center;padding:14px">—</div>`}
+        </div>
+      </div>`;
+    }).join('')}
+  </div>
+
+  <div class="card">
+    <div class="lbl lbla" style="margin-bottom:12px">✅ Checklist de Produção por Post</div>
+    ${filt.filter(p=>p.status!=='Publicado').slice(0,6).map(p=>{
+      const checks=p.checks||{};
+      const steps=['roteiro','gravado','editado','thumb','legenda','publicado'];
+      const dn=steps.filter(s=>checks[s]).length;
+      const pct2=Math.round(dn/steps.length*100);
+      return `<div style="background:var(--card2);border:1px solid var(--b);border-radius:var(--rs);padding:11px 13px;margin-bottom:7px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:6px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:5px;background:${BRAND_CLR[p.brand]||'#6B7280'}20;color:${BRAND_CLR[p.brand]||'#6B7280'}">${p.brand}</span>
+            <span style="font-size:12px;font-weight:600">${p.title}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:9px;padding:2px 7px;border-radius:5px;background:${PST_CLR[p.status]||'#6B7280'}18;color:${PST_CLR[p.status]||'#6B7280'};font-weight:700">${p.status}</span>
+            <span style="font-size:11px;font-weight:700;color:${pct2===100?'#16A854':'var(--t3)'}">${pct2}%</span>
+          </div>
+        </div>
+        <div style="display:flex;gap:5px;flex-wrap:wrap">
+          ${steps.map(s=>`<button onclick="tgPostCheck('${p.id}','${s}')" style="font-size:10px;padding:3px 9px;border-radius:14px;border:1px solid ${checks[s]?'#16A854':'var(--b)'};background:${checks[s]?'rgba(22,168,84,.12)':'transparent'};color:${checks[s]?'#16A854':'var(--t3)'};cursor:pointer;font-family:inherit;font-weight:600">${checks[s]?'✓':''} ${s}</button>`).join('')}
+        </div>
+      </div>`;
+    }).join('')||`<div class="dimx" style="text-align:center;padding:14px">Nenhum post em produção</div>`}
+  </div>
+
+  <div id="post-modal-wrap"></div>
+  </div>`;
+  el.innerHTML=h;
+}
+
+function tgPostCheck(pid,step){
+  const p=st.posts.find(x=>x.id===pid);if(!p)return;
+  if(!p.checks)p.checks={};
+  p.checks[step]=!p.checks[step];
+  save();renderSocial(document.getElementById('main'));
+}
+
+function openPostModal(pid){
+  const p=pid?st.posts.find(x=>x.id===pid):null;
+  const wrap=document.getElementById('post-modal-wrap');if(!wrap)return;
+  wrap.innerHTML=`<div style="position:fixed;inset:0;background:rgba(7,7,13,.88);display:flex;align-items:center;justify-content:center;z-index:200;padding:20px" onclick="this.remove()">
+    <div style="background:var(--card);border:1px solid rgba(255,255,255,.12);border-radius:var(--r);padding:22px;width:100%;max-width:420px" onclick="event.stopPropagation()">
+      <div style="font-size:14px;font-weight:800;margin-bottom:16px">${p?'Editar Post':'+ Novo Post'}</div>
+      <div style="margin-bottom:10px"><div class="lbl">Marca</div><select class="inp" id="pB" style="cursor:pointer">${BRANDS.map(b=>`<option ${p&&p.brand===b?'selected':''}>${b}</option>`).join('')}</select></div>
+      <div style="margin-bottom:10px"><div class="lbl">Título</div><input class="inp" id="pT" value="${p?p.title:''}" placeholder="Descreva o conteúdo..."></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+        <div><div class="lbl">Plataforma</div><select class="inp" id="pP">${PLATS_SOCIAL.map(s=>`<option ${p&&p.plat===s?'selected':''}>${s}</option>`).join('')}</select></div>
+        <div><div class="lbl">Status</div><select class="inp" id="pS">${POST_STATUS.map(s=>`<option ${p&&p.status===s?'selected':''}>${s}</option>`).join('')}</select></div>
+      </div>
+      <div style="margin-bottom:14px"><div class="lbl">Data</div><input class="inp" type="date" id="pD" value="${p?p.date:new Date().toISOString().slice(0,10)}"></div>
+      <div style="display:flex;gap:8px">
+        <button onclick="savePost('${p?p.id:''}')" style="flex:1;padding:9px;border-radius:var(--rs);border:none;background:${T.a};color:#07070D;font-family:inherit;font-weight:700;font-size:13px;cursor:pointer">Salvar</button>
+        ${p?`<button onclick="deletePost('${p.id}')" style="padding:9px 14px;border-radius:var(--rs);border:1px solid rgba(239,68,68,.3);background:rgba(239,68,68,.1);color:#EF4444;font-family:inherit;font-weight:600;font-size:12px;cursor:pointer">Excluir</button>`:''}
+        <button onclick="this.closest('[style*=fixed]').remove()" style="padding:9px 14px;border-radius:var(--rs);border:1px solid var(--b);background:transparent;color:var(--t2);font-family:inherit;font-weight:600;font-size:12px;cursor:pointer">Cancelar</button>
+      </div>
+    </div>
+  </div>`;
+}
+function openEditPost(pid){openPostModal(pid);}
+function savePost(pid){
+  const brand=document.getElementById('pB')?.value||'NextLevel';
+  const title=document.getElementById('pT')?.value||'';if(!title.trim())return;
+  const plat=document.getElementById('pP')?.value||'Instagram';
+  const status=document.getElementById('pS')?.value||'Ideia';
+  const date=document.getElementById('pD')?.value||new Date().toISOString().slice(0,10);
+  if(pid){const p=st.posts.find(x=>x.id===pid);if(p){p.brand=brand;p.title=title;p.plat=plat;p.status=status;p.date=date;}}
+  else{st.posts.push({id:'p'+Date.now(),brand,title,plat,status,date,checks:{roteiro:false,gravado:false,editado:false,thumb:false,legenda:false,publicado:false}});}
+  save();document.querySelector('[style*="position:fixed"]')?.remove();renderSocial(document.getElementById('main'));
+}
+function deletePost(pid){if(!confirm('Excluir post?'))return;st.posts=st.posts.filter(x=>x.id!==pid);save();document.querySelector('[style*="position:fixed"]')?.remove();renderSocial(document.getElementById('main'));}
+
+/* ═══════════════════════════════════════════════════
+   EDIÇÃO DE VÍDEOS
+═══════════════════════════════════════════════════ */
+const VID_STATUS=['Ideia','Editar','Gravado','Publicado'];
+const VID_STATUS_CLR={'Ideia':'#6B7280','Editar':'#F59E0B','Gravado':'#3B82F6','Publicado':'#16A854'};
+function renderVideos(el){
+  if(!st._vBrand)st._vBrand='Todos';
+  const brands=['Todos',...BRANDS];
+  const filt=st.videos.filter(v=>st._vBrand==='Todos'||v.brand===st._vBrand);
+  let h=`<div class="pw fade">
+  <div class="ph" style="margin-bottom:4px">🎬 Edição de Vídeos</div>
+  <div class="psub" style="margin-bottom:14px">Fila de produção, briefings, checklist de pós-produção e integração com cronômetro</div>
+  <div style="display:flex;align-items:center;gap:7px;margin-bottom:14px;flex-wrap:wrap">
+    <span class="dimx">Marca:</span>
+    ${brands.map(b=>`<button onclick="st._vBrand='${b}';save();renderVideos(document.getElementById('main'))" style="font-size:11px;padding:4px 11px;border-radius:7px;border:none;cursor:pointer;font-family:inherit;font-weight:600;background:${st._vBrand===b?BRAND_CLR[b]||T.a:'rgba(255,255,255,.07)'};color:${st._vBrand===b?'#07070D':'var(--t2)'}">${b}</button>`).join('')}
+    <button onclick="openVideoModal()" style="font-size:11px;padding:4px 12px;border-radius:7px;border:none;cursor:pointer;font-family:inherit;font-weight:700;background:${T.a};color:#07070D;margin-left:auto">+ Vídeo</button>
+  </div>
+
+  <div style="display:flex;gap:9px;overflow-x:auto;padding-bottom:6px;margin-bottom:18px">
+    ${VID_STATUS.map(s=>{
+      const vs=filt.filter(v=>v.status===s);
+      const sc=VID_STATUS_CLR[s];
+      return `<div style="flex:1;min-width:180px">
+        <div style="padding:7px 11px;border-radius:var(--rs) var(--rs) 0 0;border:1px solid var(--b);border-bottom:none;font-size:9px;font-weight:700;color:${sc};background:rgba(255,255,255,.02);display:flex;justify-content:space-between"><span>${s}</span><span style="color:var(--t3)">${vs.length}</span></div>
+        <div style="border:1px solid var(--b);border-radius:0 0 var(--rs) var(--rs);padding:7px;min-height:90px;background:rgba(255,255,255,.01)">
+          ${vs.map(v=>`<div style="background:var(--card);border:1px solid var(--b);border-left:3px solid ${BRAND_CLR[v.brand]||'#6B7280'};border-radius:6px;padding:8px 10px;margin-bottom:6px;cursor:pointer" onclick="openEditVideoModal('${v.id}')">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:4px;margin-bottom:3px">
+              <span style="font-size:9px;font-weight:700;color:${BRAND_CLR[v.brand]||'#6B7280'}">${v.brand}</span>
+              <span style="font-size:9px;color:${v.priority==='high'?'#EF4444':'var(--t3)'};">${v.priority==='high'?'🔴 urgente':v.plat}</span>
+            </div>
+            <div style="font-size:11px;font-weight:600;line-height:1.35;margin-bottom:3px">${v.title}</div>
+            <div class="dimx">${v.duration} · ${v.plat}</div>
+          </div>`).join('')||`<div class="dimx" style="text-align:center;padding:14px">—</div>`}
+        </div>
+      </div>`;
+    }).join('')}
+  </div>
+
+  <div class="card">
+    <div class="lbl lbla" style="margin-bottom:12px">🎬 Checklist de Pós-Produção</div>
+    ${filt.filter(v=>v.status!=='Publicado').map(v=>{
+      const checks=v.checks||{};
+      const steps=[['corte','✂ Corte'],['legenda','💬 Legenda'],['thumb','🖼 Thumb'],['dubagemEN','🌎 Dublagem EN'],['publicado','✅ Publicado']];
+      const dn=steps.filter(([s])=>checks[s]).length;
+      const pct2=Math.round(dn/steps.length*100);
+      return `<div style="background:var(--card2);border:1px solid var(--b);border-radius:var(--rs);padding:11px 13px;margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;flex-wrap:wrap;gap:6px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:5px;background:${BRAND_CLR[v.brand]||'#6B7280'}20;color:${BRAND_CLR[v.brand]||'#6B7280'}">${v.brand}</span>
+            <span style="font-size:12px;font-weight:600">${v.title}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+            <span class="dimx">${v.duration} · ${v.plat}</span>
+            <span style="font-size:11px;font-weight:700;color:${pct2===100?'#16A854':'var(--t3)'}">${pct2}%</span>
+            <button onclick="tmrStart('Editar: ${v.title.replace(/'/g,"\\'").replace(/"/g,'&quot;')}');go('timer')" style="font-size:10px;padding:3px 9px;border-radius:6px;border:none;background:rgba(255,255,255,.07);color:var(--t2);cursor:pointer;font-family:inherit;font-weight:600">▶ Timer</button>
+          </div>
+        </div>
+        ${v.briefing?`<div style="font-size:11px;color:var(--t3);margin-bottom:8px;padding:7px 10px;background:rgba(255,255,255,.03);border-radius:5px;line-height:1.55">${v.briefing}</div>`:''}
+        <div style="display:flex;gap:5px;flex-wrap:wrap">
+          ${steps.map(([s,l])=>`<button onclick="tgVidCheck('${v.id}','${s}')" style="font-size:10px;padding:3px 9px;border-radius:14px;border:1px solid ${checks[s]?'#16A854':'var(--b)'};background:${checks[s]?'rgba(22,168,84,.12)':'transparent'};color:${checks[s]?'#16A854':'var(--t3)'};cursor:pointer;font-family:inherit;font-weight:600">${l}</button>`).join('')}
+        </div>
+      </div>`;
+    }).join('')||`<div class="dimx" style="text-align:center;padding:14px">Nenhum vídeo em produção</div>`}
+  </div>
+
+  <div id="video-modal-wrap"></div>
+  </div>`;
+  el.innerHTML=h;
+}
+function tgVidCheck(vid,step){const v=st.videos.find(x=>x.id===vid);if(!v)return;if(!v.checks)v.checks={};v.checks[step]=!v.checks[step];save();renderVideos(document.getElementById('main'));}
+function openVideoModal(pid){
+  const v=pid?st.videos.find(x=>x.id===pid):null;
+  const wrap=document.getElementById('video-modal-wrap');if(!wrap)return;
+  wrap.innerHTML=`<div style="position:fixed;inset:0;background:rgba(7,7,13,.88);display:flex;align-items:center;justify-content:center;z-index:200;padding:20px" onclick="this.remove()">
+    <div style="background:var(--card);border:1px solid rgba(255,255,255,.12);border-radius:var(--r);padding:22px;width:100%;max-width:440px" onclick="event.stopPropagation()">
+      <div style="font-size:14px;font-weight:800;margin-bottom:16px">${v?'Editar Vídeo':'+ Novo Vídeo'}</div>
+      <div style="margin-bottom:10px"><div class="lbl">Marca</div><select class="inp" id="vB">${BRANDS.map(b=>`<option ${v&&v.brand===b?'selected':''}>${b}</option>`).join('')}</select></div>
+      <div style="margin-bottom:10px"><div class="lbl">Título</div><input class="inp" id="vT" value="${v?v.title:''}" placeholder="Título do vídeo..."></div>
+      <div style="margin-bottom:10px"><div class="lbl">Briefing / Roteiro</div><textarea class="inp" id="vBf" style="min-height:70px;resize:vertical">${v?v.briefing||'':''}</textarea></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+        <div><div class="lbl">Plataforma</div><select class="inp" id="vPl">${['TikTok','Instagram','YouTube','LinkedIn'].map(s=>`<option ${v&&v.plat===s?'selected':''}>${s}</option>`).join('')}</select></div>
+        <div><div class="lbl">Status</div><select class="inp" id="vSt">${VID_STATUS.map(s=>`<option ${v&&v.status===s?'selected':''}>${s}</option>`).join('')}</select></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+        <div><div class="lbl">Duração</div><input class="inp" id="vDu" value="${v?v.duration||'60s':'60s'}" placeholder="ex: 60s, 3min"></div>
+        <div><div class="lbl">Prioridade</div><select class="inp" id="vPr"><option value="normal" ${v&&v.priority!=='high'?'selected':''}>Normal</option><option value="high" ${v&&v.priority==='high'?'selected':''}>Alta</option></select></div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button onclick="saveVideo('${v?v.id:''}')" style="flex:1;padding:9px;border-radius:var(--rs);border:none;background:${T.a};color:#07070D;font-family:inherit;font-weight:700;font-size:13px;cursor:pointer">Salvar</button>
+        ${v?`<button onclick="deleteVideo('${v.id}')" style="padding:9px 14px;border-radius:var(--rs);border:1px solid rgba(239,68,68,.3);background:rgba(239,68,68,.1);color:#EF4444;font-family:inherit;font-weight:600;font-size:12px;cursor:pointer">Excluir</button>`:''}
+        <button onclick="this.closest('[style*=fixed]').remove()" style="padding:9px 14px;border-radius:var(--rs);border:1px solid var(--b);background:transparent;color:var(--t2);font-family:inherit;font-weight:600;font-size:12px;cursor:pointer">Cancelar</button>
+      </div>
+    </div>
+  </div>`;
+}
+function openEditVideoModal(vid){openVideoModal(vid);}
+function saveVideo(vid){
+  const brand=document.getElementById('vB')?.value||'NextLevel';
+  const title=document.getElementById('vT')?.value||'';if(!title.trim())return;
+  const briefing=document.getElementById('vBf')?.value||'';
+  const plat=document.getElementById('vPl')?.value||'TikTok';
+  const status=document.getElementById('vSt')?.value||'Ideia';
+  const duration=document.getElementById('vDu')?.value||'60s';
+  const priority=document.getElementById('vPr')?.value||'normal';
+  if(vid){const v=st.videos.find(x=>x.id===vid);if(v){v.brand=brand;v.title=title;v.briefing=briefing;v.plat=plat;v.status=status;v.duration=duration;v.priority=priority;}}
+  else{st.videos.push({id:'v'+Date.now(),brand,title,briefing,plat,status,duration,priority,checks:{corte:false,legenda:false,thumb:false,dubagemEN:false,publicado:false}});}
+  save();document.querySelector('[style*="position:fixed"]')?.remove();renderVideos(document.getElementById('main'));
+}
+function deleteVideo(vid){if(!confirm('Excluir vídeo?'))return;st.videos=st.videos.filter(x=>x.id!==vid);save();document.querySelector('[style*="position:fixed"]')?.remove();renderVideos(document.getElementById('main'));}
+
+/* ═══════════════════════════════════════════════════
+   GESTÃO DE ADS
+═══════════════════════════════════════════════════ */
+const ADS_STATUS=['Proposta','Planejada','Ativa','Pausada','Encerrada'];
+const ADS_STATUS_CLR={'Ativa':'#16A854','Pausada':'#E8A820','Proposta':'#3B82F6','Planejada':'#A855F7','Encerrada':'#6B7280'};
+function renderAds(el){
+  if(!st._adsPl)st._adsPl='Todos';
+  const plats=['Todos',...ADS_PLATS];
+  const filt=st.adsCampaigns.filter(a=>st._adsPl==='Todos'||a.plat===st._adsPl);
+  const totalSpend=st.adsCampaigns.reduce((a,c)=>a+(+c.spend||0),0);
+  const ativas=st.adsCampaigns.filter(a=>a.status==='Ativa').length;
+  const plano=st.adsCampaigns.filter(a=>['Proposta','Planejada'].includes(a.status)).length;
+  const PLAT_CLR={'Meta Ads':'#1877F2','Google Ads':'#EA4335','TikTok Ads':'#010101'};
+  let h=`<div class="pw fade">
+  <div class="ph" style="margin-bottom:4px">📣 Gestão de Ads</div>
+  <div class="psub" style="margin-bottom:14px">Status por plataforma, budget vs gasto, resultados editáveis e checklist semanal</div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px">
+    <div style="background:var(--card2);border-radius:9px;padding:13px"><div style="font-size:22px;font-weight:800;color:#16A854;font-family:'JetBrains Mono',monospace">${ativas}</div><div style="font-size:9px;color:var(--t3);font-weight:700;text-transform:uppercase;letter-spacing:.04em">Campanhas Ativas</div></div>
+    <div style="background:var(--card2);border-radius:9px;padding:13px"><div style="font-size:22px;font-weight:800;color:#EF4444;font-family:'JetBrains Mono',monospace">R$${totalSpend.toLocaleString('pt-BR')}</div><div style="font-size:9px;color:var(--t3);font-weight:700;text-transform:uppercase;letter-spacing:.04em">Gasto Total Mês</div></div>
+    <div style="background:var(--card2);border-radius:9px;padding:13px"><div style="font-size:22px;font-weight:800;color:#3B82F6;font-family:'JetBrains Mono',monospace">${plano}</div><div style="font-size:9px;color:var(--t3);font-weight:700;text-transform:uppercase;letter-spacing:.04em">Em Planejamento</div></div>
+  </div>
+
+  <div style="display:flex;align-items:center;gap:7px;margin-bottom:12px;flex-wrap:wrap">
+    ${plats.map(p=>{const c=PLAT_CLR[p]||T.a;return`<button onclick="st._adsPl='${p}';save();renderAds(document.getElementById('main'))" style="font-size:11px;padding:4px 12px;border-radius:7px;border:none;cursor:pointer;font-family:inherit;font-weight:600;background:${st._adsPl===p?c:'rgba(255,255,255,.07)'};color:${st._adsPl===p?'#fff':'var(--t2)'}">${p==='Todos'?'Todas':p}</button>`;}).join('')}
+    <button onclick="openAdModal()" style="font-size:11px;padding:4px 12px;border-radius:7px;border:none;cursor:pointer;font-family:inherit;font-weight:700;background:${T.a};color:#07070D;margin-left:auto">+ Campanha</button>
+  </div>
+
+  <div class="card" style="margin-bottom:14px;overflow-x:auto">
+    <div class="lbl lbla" style="margin-bottom:12px">Campanhas</div>
+    <table style="width:100%;border-collapse:collapse">
+      <thead><tr>
+        <th style="font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--t3);padding:7px 9px;text-align:left;border-bottom:1px solid var(--b)">Cliente</th>
+        <th style="font-size:9px;font-weight:700;color:var(--t3);padding:7px 9px;text-align:left;border-bottom:1px solid var(--b)">Plataforma</th>
+        <th style="font-size:9px;font-weight:700;color:var(--t3);padding:7px 9px;text-align:left;border-bottom:1px solid var(--b)">Objetivo</th>
+        <th style="font-size:9px;font-weight:700;color:var(--t3);padding:7px 9px;text-align:left;border-bottom:1px solid var(--b)">Status</th>
+        <th style="font-size:9px;font-weight:700;color:var(--t3);padding:7px 9px;text-align:right;border-bottom:1px solid var(--b)">Budget</th>
+        <th style="font-size:9px;font-weight:700;color:var(--t3);padding:7px 9px;text-align:right;border-bottom:1px solid var(--b)">Gasto</th>
+        <th style="font-size:9px;font-weight:700;color:var(--t3);padding:7px 9px;text-align:right;border-bottom:1px solid var(--b)">CTR%</th>
+        <th style="font-size:9px;font-weight:700;color:var(--t3);padding:7px 9px;text-align:right;border-bottom:1px solid var(--b)">CPL</th>
+        <th style="font-size:9px;font-weight:700;color:var(--t3);padding:7px 9px;text-align:right;border-bottom:1px solid var(--b)">Conv.</th>
+        <th style="font-size:9px;font-weight:700;color:var(--t3);padding:7px 9px;text-align:center;border-bottom:1px solid var(--b)">Ação</th>
+      </tr></thead>
+      <tbody>
+        ${filt.map(a=>{
+          const sc=ADS_STATUS_CLR[a.status]||'#6B7280';
+          const bpct=a.budget>0?Math.round((a.spend/a.budget)*100):0;
+          const pc=PLAT_CLR[a.plat]||'#888';
+          return `<tr style="border-bottom:1px solid rgba(255,255,255,.04)">
+            <td style="padding:9px;font-size:12px;font-weight:600">${a.client}</td>
+            <td style="padding:9px"><span style="font-size:9px;padding:2px 7px;border-radius:5px;background:${pc}22;color:${pc};font-weight:700">${a.plat}</span></td>
+            <td style="padding:9px;font-size:11px;color:var(--t2)">${a.goal}</td>
+            <td style="padding:9px"><span style="font-size:9px;padding:2px 7px;border-radius:5px;background:${sc}18;color:${sc};font-weight:700;cursor:pointer" onclick="cycleAdStatus('${a.id}')" title="Clique para avançar status">${a.status} ↻</span></td>
+            <td style="padding:9px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:12px">R$${(a.budget||0).toLocaleString('pt-BR')}</td>
+            <td style="padding:9px;text-align:right"><input style="background:transparent;border:none;color:${bpct>90?'#EF4444':bpct>70?'#E8A820':'var(--t1)'};font-family:'JetBrains Mono',monospace;font-size:12px;width:68px;outline:none;text-align:right" type="number" value="${a.spend||0}" onchange="updAd('${a.id}','spend',this.value)" onfocus="this.style.background='rgba(255,255,255,.05)'"></td>
+            <td style="padding:9px;text-align:right"><input style="background:transparent;border:none;color:var(--t1);font-family:'JetBrains Mono',monospace;font-size:12px;width:52px;outline:none;text-align:right" type="number" step="0.1" value="${a.ctr||0}" onchange="updAd('${a.id}','ctr',this.value)"></td>
+            <td style="padding:9px;text-align:right"><input style="background:transparent;border:none;color:var(--t1);font-family:'JetBrains Mono',monospace;font-size:12px;width:60px;outline:none;text-align:right" type="number" value="${a.cpl||0}" onchange="updAd('${a.id}','cpl',this.value)"></td>
+            <td style="padding:9px;text-align:right"><input style="background:transparent;border:none;color:var(--t1);font-family:'JetBrains Mono',monospace;font-size:12px;width:52px;outline:none;text-align:right" type="number" value="${a.conv||0}" onchange="updAd('${a.id}','conv',this.value)"></td>
+            <td style="padding:9px;text-align:center"><button onclick="delAd('${a.id}')" style="font-size:10px;padding:3px 8px;border-radius:5px;border:1px solid rgba(239,68,68,.2);background:rgba(239,68,68,.08);color:#EF4444;cursor:pointer;font-family:inherit">✕</button></td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="lbl lbla" style="margin-bottom:12px">✅ Checklist Semanal de Ads</div>
+    ${filt.filter(a=>['Ativa','Planejada'].includes(a.status)).map(a=>{
+      const checks=a.checks||{};
+      const steps=[['criativo','🎨 Criar criativo'],['campanha','🚀 Subir campanha'],['relatorio','📊 Relatório'],['otimizacao','⚡ Otimizar']];
+      const dn=steps.filter(([s])=>checks[s]).length;
+      const pct2=Math.round(dn/steps.length*100);
+      return `<div style="background:var(--card2);border:1px solid var(--b);border-radius:var(--rs);padding:10px 12px;margin-bottom:7px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px">
+          <div style="font-size:12px;font-weight:600">${a.client} <span style="color:var(--t3);font-weight:400">— ${a.plat} — ${a.goal}</span></div>
+          <span style="font-size:11px;font-weight:700;color:${pct2===100?'#16A854':'var(--t3)'}">${pct2}%</span>
+        </div>
+        <div style="display:flex;gap:5px;flex-wrap:wrap">
+          ${steps.map(([s,l])=>`<button onclick="tgAdCheck('${a.id}','${s}')" style="font-size:10px;padding:3px 9px;border-radius:14px;border:1px solid ${checks[s]?'#16A854':'var(--b)'};background:${checks[s]?'rgba(22,168,84,.12)':'transparent'};color:${checks[s]?'#16A854':'var(--t3)'};cursor:pointer;font-family:inherit;font-weight:600">${l}</button>`).join('')}
+        </div>
+      </div>`;
+    }).join('')||`<div class="dimx" style="text-align:center;padding:14px">Nenhuma campanha ativa ou planejada</div>`}
+  </div>
+  <div id="ad-modal-wrap"></div>
+  </div>`;
+  el.innerHTML=h;
+}
+function updAd(aid,field,val){const a=st.adsCampaigns.find(x=>x.id===aid);if(a){a[field]=parseFloat(val)||0;save();}}
+function cycleAdStatus(aid){const a=st.adsCampaigns.find(x=>x.id===aid);if(!a)return;const i=ADS_STATUS.indexOf(a.status);a.status=ADS_STATUS[(i+1)%ADS_STATUS.length];save();renderAds(document.getElementById('main'));}
+function delAd(aid){if(!confirm('Excluir campanha?'))return;st.adsCampaigns=st.adsCampaigns.filter(x=>x.id!==aid);save();renderAds(document.getElementById('main'));}
+function tgAdCheck(aid,step){const a=st.adsCampaigns.find(x=>x.id===aid);if(!a)return;if(!a.checks)a.checks={};a.checks[step]=!a.checks[step];save();renderAds(document.getElementById('main'));}
+function openAdModal(){
+  const wrap=document.getElementById('ad-modal-wrap');if(!wrap)return;
+  wrap.innerHTML=`<div style="position:fixed;inset:0;background:rgba(7,7,13,.88);display:flex;align-items:center;justify-content:center;z-index:200;padding:20px" onclick="this.remove()">
+    <div style="background:var(--card);border:1px solid rgba(255,255,255,.12);border-radius:var(--r);padding:22px;width:100%;max-width:420px" onclick="event.stopPropagation()">
+      <div style="font-size:14px;font-weight:800;margin-bottom:16px">+ Nova Campanha</div>
+      <div style="margin-bottom:10px"><div class="lbl">Cliente</div><select class="inp" id="aClient">${ADS_CLIENTS.map(c=>`<option>${c}</option>`).join('')}</select></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+        <div><div class="lbl">Plataforma</div><select class="inp" id="aPlat">${ADS_PLATS.map(p=>`<option>${p}</option>`).join('')}</select></div>
+        <div><div class="lbl">Status</div><select class="inp" id="aStatus"><option>Proposta</option><option>Planejada</option><option>Ativa</option></select></div>
+      </div>
+      <div style="margin-bottom:10px"><div class="lbl">Objetivo da Campanha</div><input class="inp" id="aGoal" placeholder="ex: Leads WhatsApp, Vendas TikTok..."></div>
+      <div style="margin-bottom:14px"><div class="lbl">Budget Mensal (R$)</div><input class="inp" type="number" id="aBudget" placeholder="0"></div>
+      <div style="display:flex;gap:8px">
+        <button onclick="saveAd()" style="flex:1;padding:9px;border-radius:var(--rs);border:none;background:${T.a};color:#07070D;font-family:inherit;font-weight:700;font-size:13px;cursor:pointer">Salvar</button>
+        <button onclick="this.closest('[style*=fixed]').remove()" style="padding:9px 14px;border-radius:var(--rs);border:1px solid var(--b);background:transparent;color:var(--t2);font-family:inherit;font-weight:600;font-size:12px;cursor:pointer">Cancelar</button>
+      </div>
+    </div>
+  </div>`;
+}
+function saveAd(){
+  const client=document.getElementById('aClient')?.value||'Alpha Outfit';
+  const plat=document.getElementById('aPlat')?.value||'Meta Ads';
+  const status=document.getElementById('aStatus')?.value||'Proposta';
+  const goal=document.getElementById('aGoal')?.value||'';
+  const budget=parseFloat(document.getElementById('aBudget')?.value||0)||0;
+  st.adsCampaigns.push({id:'ad'+Date.now(),client,plat,status,goal,budget,spend:0,ctr:0,cpl:0,conv:0,checks:{criativo:false,campanha:false,relatorio:false,otimizacao:false}});
+  save();document.querySelector('[style*="position:fixed"]')?.remove();renderAds(document.getElementById('main'));
+}
+
 </script>
 </body>
 </html>
