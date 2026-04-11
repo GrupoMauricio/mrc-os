@@ -1010,8 +1010,6 @@ async function callAI(systemPrompt, userPrompt, maxTokens=1000){
     body:JSON.stringify({
       messages:[{role:'system',content:systemPrompt},{role:'user',content:userPrompt}],
       model:'openai',
-      seed:-1,
-      private:true,
     }),
   });
   if(!resp.ok)throw new Error('Pollinations error '+resp.status);
