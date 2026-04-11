@@ -848,7 +848,8 @@ let st={
     bootcamp:{lessonsDone:{},notes:{}},
   },
   integrations:{
-    anthropic:{key:'',active:false,label:'Anthropic API Key',note:'Chave para MRC AI e análises estratégicas'},
+    openai:{key:'',active:false,label:'OpenAI API Key',note:'Ativa MRC AI, análises e agenda inteligente (gpt-4o-mini)'},
+    anthropic:{key:'',active:false,label:'Anthropic API Key',note:'Alternativa ao OpenAI (claude-sonnet-4-6)'},
     gcal:{key:'',active:false,label:'Google Calendar',note:'Via URL — sempre disponível'},
     meta:{key:'',active:false,label:'Meta Ads API',note:'Métricas Alpha Outfit + ViiTss'},
     instagram:{key:'',active:false,label:'Instagram Graph',note:'Engajamento dos clientes'},
@@ -874,7 +875,7 @@ if(!st.lab.toolTests)st.lab.toolTests={};
 if(!st.lab.bootcamp)st.lab.bootcamp={lessonsDone:{},notes:{}};
 if(!st.integrations)st.integrations={};
 // Ensure all integration keys exist
-Object.keys({anthropic:1,gcal:1,meta:1,instagram:1,sheets:1,beehiiv:1,youtube:1,airtable_tk:1,make_hook:1}).forEach(k=>{
+Object.keys({openai:1,anthropic:1,gcal:1,meta:1,instagram:1,sheets:1,beehiiv:1,youtube:1,airtable_tk:1,make_hook:1}).forEach(k=>{
   if(!st.integrations[k])st.integrations[k]={key:'',active:false,label:'',note:''};
 });
 // Ensure gcal always "available"
@@ -953,44 +954,75 @@ function renderMarkdown(txt){
     .replace(/\n/g,'<br>');
 }
 
-function aiHeaders(){
-  return{
-    'Content-Type':'application/json',
-    'x-api-key':st.integrations?.anthropic?.key||'',
-    'anthropic-version':'2023-06-01',
-    'anthropic-dangerous-direct-browser-access':'true',
-  };
+/* ─── AI PROVIDER LAYER ─────────────────────────────────
+   Suporta OpenAI (gpt-4o-mini) e Anthropic (claude-sonnet-4-6).
+   Usa OpenAI se a chave openai estiver configurada, senão Anthropic.
+──────────────────────────────────────────────────────── */
+function aiProvider(){
+  if(st.integrations?.openai?.key)return'openai';
+  if(st.integrations?.anthropic?.key)return'anthropic';
+  return null;
 }
-function aiModel(){return'claude-sonnet-4-6';}
 
-async function aiQuery(prompt,cacheKey,ctx,ttl=4*3600*1000){
-  const cached=getCache(cacheKey,ttl);
-  if(cached)return cached;
-  const apiKey=st.integrations?.anthropic?.key||'';
-  if(!apiKey)return'⚠️ Configure sua **Anthropic API Key** em ⚙️ Config &amp; Integrações para ativar as análises de IA.';
-  try{
+async function callAI(systemPrompt, userPrompt, maxTokens=1000){
+  const provider=aiProvider();
+  if(!provider)return null;
+
+  if(provider==='openai'){
+    const resp=await fetch('https://api.openai.com/v1/chat/completions',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+st.integrations.openai.key},
+      body:JSON.stringify({
+        model:'gpt-4o-mini',
+        max_tokens:maxTokens,
+        messages:[{role:'system',content:systemPrompt},{role:'user',content:userPrompt}],
+      }),
+    });
+    if(!resp.ok){const e=await resp.json().catch(()=>({}));throw new Error(e.error?.message||resp.status);}
+    const d=await resp.json();
+    return d.choices&&d.choices[0]?d.choices[0].message.content:'';
+  }
+
+  if(provider==='anthropic'){
     const resp=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
       headers:{
         'Content-Type':'application/json',
-        'x-api-key':apiKey,
+        'x-api-key':st.integrations.anthropic.key,
         'anthropic-version':'2023-06-01',
         'anthropic-dangerous-direct-browser-access':'true',
       },
       body:JSON.stringify({
         model:'claude-sonnet-4-6',
-        max_tokens:1000,
-        system:'Você é o assistente estratégico do MRC OS v13. Responda em português brasileiro. Seja direto e prático.',
-        messages:[{role:'user',content:prompt}],
+        max_tokens:maxTokens,
+        system:systemPrompt,
+        messages:[{role:'user',content:userPrompt}],
       }),
     });
-    if(!resp.ok){const err=await resp.json().catch(()=>({}));return`❌ Erro da API: ${err.error?.message||resp.status}. Verifique sua chave em Config.`;}
-    const data=await resp.json();
-    const txt=data.content&&data.content[0]?data.content[0].text:'Não foi possível gerar a análise.';
+    if(!resp.ok){const e=await resp.json().catch(()=>({}));throw new Error(e.error?.message||resp.status);}
+    const d=await resp.json();
+    return d.content&&d.content[0]?d.content[0].text:'';
+  }
+}
+
+function aiNoKeyMsg(){
+  return'⚠️ Configure sua **OpenAI API Key** (ou Anthropic) em ⚙️ Config &amp; Integrações para ativar a IA.';
+}
+
+async function aiQuery(prompt,cacheKey,ctx,ttl=4*3600*1000){
+  const cached=getCache(cacheKey,ttl);
+  if(cached)return cached;
+  if(!aiProvider())return aiNoKeyMsg();
+  try{
+    const txt=await callAI(
+      'Você é o assistente estratégico do MRC OS v13. Responda em português brasileiro. Seja direto e prático.',
+      prompt,1000
+    );
     setCache(cacheKey,txt);
     return txt;
-  }catch(e){return'❌ Erro ao conectar com a IA. Verifique sua conexão e a chave em Config.';}
+  }catch(e){return`❌ Erro da API: ${e.message}. Verifique sua chave em Config.`;}
 }
+
 
 async function aiInsightCard(containerId,prompt,cacheKey,ctx,label='🧠 Análise Estratégica IA'){
   showSkeleton(containerId);
@@ -1050,30 +1082,16 @@ function hideTyping(){const t=document.getElementById('chat-typing');if(t)t.remo
 async function sendChatMessage(msg){
   renderChatBubble('user',msg);
   showTyping();
-  const apiKey=st.integrations?.anthropic?.key||'';
-  if(!apiKey){hideTyping();renderChatBubble('ai','⚠️ Configure sua **Anthropic API Key** em ⚙️ Config &amp; Integrações para usar o chat.');return;}
+  if(!aiProvider()){hideTyping();renderChatBubble('ai',aiNoKeyMsg());return;}
   try{
     const ctx=`Estado atual: Receita mensal R$${totalRev().toLocaleString('pt-BR')}, Meta: R$10.000. XP: ${st.xp}. Negócios ativos: NextLevel, Brás Digital, MauricioCRM, Mega Tron, Mentorias, AmazonIA+IDESA. Clientes: Alpha Outfit, ViiTss, Cusi Modas.`;
-    const resp=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{
-        'Content-Type':'application/json',
-        'x-api-key':apiKey,
-        'anthropic-version':'2023-06-01',
-        'anthropic-dangerous-direct-browser-access':'true',
-      },
-      body:JSON.stringify({
-        model:'claude-sonnet-4-6',max_tokens:1000,
-        system:`Você é o MRC AI, assistente estratégico pessoal de Mauricio Ramos dos Santos Junior, fundador solo em São Paulo. ${ctx} Responda de forma direta e prática em português brasileiro. Máximo 200 palavras.`,
-        messages:[{role:'user',content:msg}],
-      }),
-    });
+    const txt=await callAI(
+      `Você é o MRC AI, assistente estratégico pessoal de Mauricio Ramos dos Santos Junior, fundador solo em São Paulo. ${ctx} Responda de forma direta e prática em português brasileiro. Máximo 200 palavras.`,
+      msg,1000
+    );
     hideTyping();
-    if(!resp.ok){const err=await resp.json().catch(()=>({}));renderChatBubble('ai',`❌ Erro da API (${resp.status}): ${err.error?.message||'verifique sua chave em Config.'}`);return;}
-    const data=await resp.json();
-    const txt=data.content&&data.content[0]?data.content[0].text:'Não foi possível responder agora.';
-    renderChatBubble('ai',txt);
-  }catch(e){hideTyping();renderChatBubble('ai','❌ Erro de conexão. Verifique sua internet e tente novamente.');}
+    renderChatBubble('ai',txt||'Não foi possível responder agora.');
+  }catch(e){hideTyping();renderChatBubble('ai',`❌ Erro da API: ${e.message}. Verifique sua chave em Config.`);}
 }
 function sendChatFromInput(){
   const inp=document.getElementById('chat-inp');
@@ -1209,21 +1227,13 @@ Retorne SOMENTE JSON válido com esta estrutura (sem markdown, sem backticks):
 {"mon":[{"time":"HH:MM","duration":90,"label":"...","icon":"emoji","color":"#hex","bizRef":null}],"tue":[...],"wed":[...],"thu":[...],"fri":[...],"sat":[...]}
 Máximo 4 blocos por dia. Seja realista para um fundador solo.`;
 
-  if(!st.integrations?.anthropic?.key){toast('⚠️ Configure a Anthropic API Key em Config');if(btn){btn.disabled=false;btn.textContent='⚡ Sugerir com IA';}return;}
+  if(!aiProvider()){toast('⚠️ Configure a OpenAI API Key em Config');if(btn){btn.disabled=false;btn.textContent='⚡ Sugerir com IA';}return;}
   try{
-    const resp=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:aiHeaders(),
-      body:JSON.stringify({
-        model:aiModel(),max_tokens:1000,
-        system:'Você é um assistente de produtividade. Retorne SOMENTE JSON válido, sem markdown, sem texto extra.',
-        messages:[{role:'user',content:prompt}],
-      }),
-    });
-    if(!resp.ok){const err=await resp.json().catch(()=>({}));toast(`❌ Erro IA: ${err.error?.message||resp.status}`);if(btn){btn.disabled=false;btn.textContent='⚡ Sugerir com IA';}return;}
-    const data=await resp.json();
-    const txt=data.content&&data.content[0]?data.content[0].text:'{}';
-    const clean=txt.replace(/```json|```/g,'').trim();
+    const rawTxt=await callAI(
+      'Você é um assistente de produtividade. Retorne SOMENTE JSON válido, sem markdown, sem texto extra.',
+      prompt,1000
+    );
+    const clean=(rawTxt||'{}').replace(/```json|```/g,'').trim();
     const parsed=JSON.parse(clean);
     const wk=getCurrentWeekKey();
     if(!st.agenda.week[wk])st.agenda.week[wk]={};
@@ -1483,16 +1493,9 @@ async function suggestToolForTask(task){
   const prompt=`Mauricio quer: "${task}". 
 Ferramentas disponíveis: ${tools}.
 Qual(is) ferramenta(s) usar? Como? Seja direto. Máximo 3 frases.`;
-  if(!st.integrations?.anthropic?.key){if(el)el.innerHTML='<div class="dimx">⚠️ Configure a Anthropic API Key em Config para usar esta função.</div>';return;}
+  if(!aiProvider()){if(el)el.innerHTML='<div class="dimx">⚠️ Configure a OpenAI API Key em Config para usar esta função.</div>';return;}
   try{
-    const resp=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',headers:aiHeaders(),
-      body:JSON.stringify({model:aiModel(),max_tokens:300,
-        system:'Responda em português brasileiro, de forma direta e prática.',
-        messages:[{role:'user',content:prompt}]}),
-    });
-    const data=await resp.json();
-    const txt=data.content&&data.content[0]?data.content[0].text:'';
+    const txt=await callAI('Responda em português brasileiro, de forma direta e prática.',prompt,300);
     if(el)el.innerHTML=`<div class="ai-panel" style="margin-top:0">${renderMarkdown(txt)}</div>`;
   }catch(e){if(el)el.innerHTML='<div class="dimx">❌ Erro ao consultar IA. Verifique sua chave em Config.</div>';}
 }
@@ -1594,22 +1597,15 @@ no AmazonIA Intelligence Platform e em outros SaaS.
 Seja direto. Use exemplos reais do ecossistema dele.
 Máximo 200 palavras + 1 exemplo prático concreto.`;
 
-  if(!st.integrations?.anthropic?.key){
+  if(!aiProvider()){
     const lc=document.getElementById('lesson-content');
-    if(lc)lc.innerHTML='<div class="dimx">⚠️ Configure a Anthropic API Key em ⚙️ Config para carregar o conteúdo desta aula.</div>';
+    if(lc)lc.innerHTML='<div class="dimx">⚠️ Configure a OpenAI API Key em ⚙️ Config para carregar o conteúdo desta aula.</div>';
     return;
   }
   try{
-    const resp=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',headers:aiHeaders(),
-      body:JSON.stringify({model:aiModel(),max_tokens:500,
-        system:'Responda em português brasileiro, de forma direta, prática e motivadora.',
-        messages:[{role:'user',content:prompt}]}),
-    });
-    const data=await resp.json();
-    const txt=data.content&&data.content[0]?data.content[0].text:'Conteúdo não disponível.';
+    const txt=await callAI('Responda em português brasileiro, de forma direta, prática e motivadora.',prompt,500);
     const lc=document.getElementById('lesson-content');
-    if(lc)lc.innerHTML=`<div class="ai-content">${renderMarkdown(txt)}</div>`;
+    if(lc)lc.innerHTML=`<div class="ai-content">${renderMarkdown(txt||'Conteúdo não disponível.')}</div>`;
   }catch(e){
     const lc=document.getElementById('lesson-content');
     if(lc)lc.innerHTML='<div class="dimx">❌ Erro ao carregar conteúdo. Verifique conexão e sua chave em Config.</div>';
@@ -2423,7 +2419,7 @@ function startTimerWithTask(){const inp=document.getElementById('timer-task-inp'
 function renderConfig(el){
   const saves=st._saveCount||0;
   const last=st._lastSave?new Date(st._lastSave).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):'—';
-  const aiKeyMissing=!st.integrations?.anthropic?.key;
+  const aiKeyMissing=!aiProvider();
   el.innerHTML=`<div class="pw fade">
   <div class="pg-h">⚙️ Config &amp; Integrações</div>
   <div class="pg-sub">Configurações, dados e integrações do MRC OS v13</div>
@@ -2433,8 +2429,11 @@ function renderConfig(el){
       <span style="font-size:20px">🤖</span>
       <span style="font-size:13px;font-weight:700;color:var(--t1)">IA não configurada</span>
     </div>
-    <div class="dim" style="margin-bottom:12px;font-size:12px">Para usar o chat MRC AI e as análises estratégicas, adicione sua <strong style="color:var(--t1)">Anthropic API Key</strong> abaixo. Crie sua chave em <span style="color:var(--a);font-family:'JetBrains Mono',monospace">console.anthropic.com</span>.</div>
-    <button class="btn btn-a" onclick="configIntegration('anthropic')">🤖 Configurar Anthropic API Key</button>
+    <div class="dim" style="margin-bottom:12px;font-size:12px">Para usar o chat MRC AI e as análises estratégicas, configure uma chave de API abaixo.</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-a" onclick="configIntegration('openai')">🟢 Configurar OpenAI (Recomendado)</button>
+      <button class="btn btn-g" onclick="configIntegration('anthropic')">🟣 Configurar Anthropic</button>
+    </div>
   </div>`:''}
 
   <div class="card" style="margin-top:${aiKeyMissing?'0':'20px'};margin-bottom:14px">
