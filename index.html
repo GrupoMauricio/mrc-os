@@ -610,6 +610,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#04040A;color:#E8E6F0}
         <button class="ni" data-p="social"  onclick="go('social')" ><span class="ni-ico">📱</span><span class="ni-lbl">Redes Sociais</span></button>
         <button class="ni" data-p="videos"  onclick="go('videos')" ><span class="ni-ico">🎬</span><span class="ni-lbl">Edição de Vídeos</span></button>
         <button class="ni" data-p="ads"     onclick="go('ads')"    ><span class="ni-ico">📣</span><span class="ni-lbl">Gestão de Ads</span></button>
+        <button class="ni" data-p="cashflow" onclick="go('cashflow')"><span class="ni-ico">🎲</span><span class="ni-lbl">Cashflow Teste</span></button>
         <button class="ni" data-p="lab"     onclick="go('lab')"    ><span class="ni-ico">🧪</span><span class="ni-lbl">Laboratório IA</span></button>
         <button class="ni" data-p="agenda"  onclick="go('agenda')" ><span class="ni-ico">📅</span><span class="ni-lbl">Agenda</span></button>
         <button class="ni" data-p="timer"   onclick="go('timer')"  ><span class="ni-ico">⏱</span><span class="ni-lbl">Cronômetro</span><span class="ni-badge red" id="nb-tmr" style="display:none">●</span></button>
@@ -659,6 +660,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#04040A;color:#E8E6F0}
       <button class="ni" onclick="go('social');toggleDrawer()" ><span class="ni-ico">📱</span><span class="ni-lbl">Redes Sociais</span></button>
       <button class="ni" onclick="go('videos');toggleDrawer()" ><span class="ni-ico">🎬</span><span class="ni-lbl">Edição de Vídeos</span></button>
       <button class="ni" onclick="go('ads');toggleDrawer()"    ><span class="ni-ico">📣</span><span class="ni-lbl">Gestão de Ads</span></button>
+      <button class="ni" onclick="go('cashflow');toggleDrawer()"><span class="ni-ico">🎲</span><span class="ni-lbl">Cashflow Teste</span></button>
       <button class="ni" onclick="go('lab');toggleDrawer()"    ><span class="ni-ico">🧪</span><span class="ni-lbl">Laboratório IA</span></button>
       <button class="ni" onclick="go('agenda');toggleDrawer()"><span class="ni-ico">📅</span><span class="ni-lbl">Agenda</span></button>
       <button class="ni" onclick="go('timer');toggleDrawer()"  ><span class="ni-ico">⏱</span><span class="ni-lbl">Cronômetro</span></button>
@@ -721,6 +723,7 @@ const TH={
   social:      {a:'#8B5CF6',r:'139,92,246',  bg:'#04020A',s:'#090410',c:'#0E0818',c2:'#130C20',lbl:'Redes Sociais'},
   videos:      {a:'#EF4444',r:'239,68,68',   bg:'#0A0000',s:'#100000',c:'#160000',c2:'#1C0000',lbl:'Edição de Vídeos'},
   ads:         {a:'#0EA5E9',r:'14,165,233',  bg:'#00070C',s:'#000D12',c:'#001218',c2:'#001720',lbl:'Gestão de Ads'},
+  cashflow:    {a:'#22C55E',r:'34,197,94',   bg:'#020A04',s:'#051006',c:'#07160A',c2:'#0B1C0E',lbl:'Cashflow Teste'},
   lab:         {a:'#A855F7',r:'168,85,247',  bg:'#05000A',s:'#0A0010',c:'#0F0018',c2:'#140020',lbl:'Laboratório IA'},
   agenda:      {a:'#06B6D4',r:'6,182,212',   bg:'#00080C',s:'#000D12',c:'#001218',c2:'#001720',lbl:'Agenda'},
 };
@@ -847,6 +850,19 @@ let st={
     toolTests:{},
     bootcamp:{lessonsDone:{},notes:{}},
   },
+  cashflow:{
+    playerName:'Jogador',
+    pos:0,
+    month:1,
+    salary:2500,
+    passive:0,
+    expenses:2000,
+    cash:3000,
+    debts:5000,
+    assets:[],
+    log:['Bem-vindo ao modo de teste Cashflow!'],
+    escaped:false,
+  },
   integrations:{
     openai:{key:'',active:false,label:'OpenAI API Key',note:'Ativa MRC AI, análises e agenda inteligente (gpt-4o-mini)'},
     anthropic:{key:'',active:false,label:'Anthropic API Key',note:'Alternativa ao OpenAI (claude-sonnet-4-6)'},
@@ -873,6 +889,7 @@ if(!st.lab)st.lab={tools:[],toolTests:{},bootcamp:{lessonsDone:{},notes:{}}};
 if(!st.lab.tools||!st.lab.tools.length)st.lab.tools=JSON.parse(JSON.stringify(DEFAULT_TOOLS));
 if(!st.lab.toolTests)st.lab.toolTests={};
 if(!st.lab.bootcamp)st.lab.bootcamp={lessonsDone:{},notes:{}};
+if(!st.cashflow)st.cashflow={playerName:'Jogador',pos:0,month:1,salary:2500,passive:0,expenses:2000,cash:3000,debts:5000,assets:[],log:['Bem-vindo ao modo de teste Cashflow!'],escaped:false};
 if(!st.integrations)st.integrations={};
 // Ensure all integration keys exist
 Object.keys({openai:1,anthropic:1,gcal:1,meta:1,instagram:1,sheets:1,beehiiv:1,youtube:1,airtable_tk:1,make_hook:1}).forEach(k=>{
@@ -1915,6 +1932,7 @@ function render(){
   if(pg==='social'){renderSocial(m);return;}
   if(pg==='videos'){renderVideos(m);return;}
   if(pg==='ads'){renderAds(m);return;}
+  if(pg==='cashflow'){renderCashflow(m);return;}
   if(pg==='amazoniaplat'){renderAmazonIA(m);return;}
   if(pg==='idesapg'){renderIDESA(m);return;}
   if(pg==='entidades'){renderEntidades(m);return;}
@@ -2636,6 +2654,181 @@ async function aiAdsAudience(){
 function renderCampaignsList(){if(!st.adsCampaigns||!st.adsCampaigns.length)return'<div class="dimx">Nenhuma campanha registrada.</div>';return st.adsCampaigns.map((c,i)=>`<div class="del-row"><div style="flex:1"><div style="font-size:12px;color:var(--t1)">${c.name}</div><div class="dimx">${c.platform||'—'} · R$${c.budget||0}/mês</div></div><button onclick="removecamp(${i})" style="background:none;border:none;color:var(--t3);cursor:pointer;font-size:12px;min-height:32px;min-width:32px">✕</button></div>`).join('');}
 function addCampaign(){const name=prompt('Nome da campanha:');if(!name)return;const pl=prompt('Plataforma:');const budget=+prompt('Budget R$/mês:')||0;if(!st.adsCampaigns)st.adsCampaigns=[];st.adsCampaigns.push({name,platform:pl||'',budget});save();render();}
 function removecamp(i){st.adsCampaigns.splice(i,1);save();render();}
+
+/* ═══════════════════════════════════════════════════
+   CASHFLOW TEST (MVP)
+═══════════════════════════════════════════════════ */
+const CASHFLOW_BOARD=[
+  {type:'salary',label:'Receber salário'},
+  {type:'smallDeal',label:'Pequeno negócio'},
+  {type:'expense',label:'Despesa inesperada'},
+  {type:'market',label:'Mercado'},
+  {type:'charity',label:'Caridade'},
+  {type:'smallDeal',label:'Pequeno negócio'},
+  {type:'expense',label:'Despesa inesperada'},
+  {type:'salary',label:'Receber salário'},
+  {type:'market',label:'Mercado'},
+  {type:'smallDeal',label:'Pequeno negócio'},
+  {type:'expense',label:'Despesa inesperada'},
+  {type:'salary',label:'Receber salário'},
+];
+
+function cashflowStats(){
+  const c=st.cashflow;
+  const freeCash=(c.salary+c.passive)-c.expenses;
+  return {freeCash,needToEscape:Math.max(0,c.expenses-c.passive)};
+}
+
+function renderCashflow(el){
+  const c=st.cashflow;
+  const cs=cashflowStats();
+  const pctEscape=Math.min(100,Math.round((c.passive/Math.max(1,c.expenses))*100));
+  el.innerHTML=`<div class="pw fade">
+  <div class="pg-h">🎲 Cashflow Teste</div>
+  <div class="pg-sub">Protótipo inspirado no jogo de tabuleiro: sair da corrida dos ratos com renda passiva.</div>
+
+  <div class="g3" style="margin-top:20px;margin-bottom:14px">
+    ${[
+      {l:'Caixa',v:'R$'+c.cash.toLocaleString('pt-BR'),s:'dinheiro disponível',c:'#22C55E'},
+      {l:'Passivo Mensal',v:'R$'+c.passive.toLocaleString('pt-BR'),s:'meta: cobrir despesas',c:'#06B6D4'},
+      {l:'Despesas',v:'R$'+c.expenses.toLocaleString('pt-BR'),s:'quando passivo >= despesas, você vence',c:'#EF4444'},
+    ].map(m=>`<div class="stat"><div class="stat-v" style="color:${m.c};font-size:18px">${m.v}</div><div class="stat-l">${m.l}</div><div class="stat-s">${m.s}</div></div>`).join('')}
+  </div>
+
+  <div class="card" style="margin-bottom:14px">
+    <div class="sec-lbl" style="margin-bottom:10px">📈 Progresso de liberdade financeira</div>
+    <div class="bar bar-lg"><div class="bar-f" style="width:${pctEscape}%;background:${c.escaped?'#16A854':'#22C55E'}"></div></div>
+    <div class="dim" style="margin-top:8px">${pctEscape}% — faltam R$${cs.needToEscape.toLocaleString('pt-BR')} de renda passiva para escapar.</div>
+    ${c.escaped?'<div class="tag tag-green" style="margin-top:10px;display:inline-flex">🏁 Você saiu da corrida dos ratos!</div>':''}
+  </div>
+
+  <div class="card" style="margin-bottom:14px">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">
+      <div>
+        <div class="sec-lbl">🧭 Tabuleiro (12 casas)</div>
+        <div class="dimx">Mês ${c.month} · Casa ${c.pos+1} de ${CASHFLOW_BOARD.length} · Evento atual: <strong>${CASHFLOW_BOARD[c.pos].label}</strong></div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-a" onclick="cashflowRoll()">🎲 Jogar dado</button>
+        <button class="btn btn-g" onclick="cashflowAdvanceMonth()">⏭ Fechar mês</button>
+        <button class="btn btn-g" onclick="cashflowReset()">↺ Reiniciar partida</button>
+      </div>
+    </div>
+    <div class="gauto" style="margin-top:12px">
+      ${CASHFLOW_BOARD.map((sq,i)=>`<div class="card-xs" style="border:${i===c.pos?'1px solid #22C55E':'1px solid var(--b)'};background:${i===c.pos?'rgba(34,197,94,.12)':'var(--card)'}">
+        <div style="font-size:11px;color:var(--t3);margin-bottom:4px">Casa ${i+1}</div>
+        <div style="font-size:12px;color:var(--t1)">${sq.label}</div>
+      </div>`).join('')}
+    </div>
+  </div>
+
+  <div class="g2" style="margin-bottom:14px">
+    <div class="card">
+      <div class="sec-lbl" style="margin-bottom:10px">🏢 Seus ativos</div>
+      ${c.assets.length?c.assets.map(a=>`<div class="del-row"><div style="flex:1"><div style="font-size:12px;color:var(--t1)">${a.name}</div><div class="dimx">Fluxo: +R$${a.cashflow}/mês · Custo: R$${a.cost}</div></div></div>`).join(''):'<div class="dimx">Nenhum ativo ainda. Compre negócios para aumentar o passivo mensal.</div>'}
+    </div>
+    <div class="card">
+      <div class="sec-lbl" style="margin-bottom:10px">📜 Log da rodada</div>
+      <div style="display:flex;flex-direction:column;gap:8px;max-height:220px;overflow:auto">
+        ${(c.log||[]).slice().reverse().slice(0,12).map(line=>`<div class="dimx" style="padding-bottom:6px;border-bottom:1px solid var(--b)">${line}</div>`).join('')}
+      </div>
+    </div>
+  </div>
+  </div>`;
+}
+
+function cashflowPushLog(msg){
+  st.cashflow.log=st.cashflow.log||[];
+  st.cashflow.log.push(`M${st.cashflow.month}: ${msg}`);
+  if(st.cashflow.log.length>60)st.cashflow.log.shift();
+}
+
+function cashflowRoll(){
+  const c=st.cashflow;
+  const dice=Math.floor(Math.random()*6)+1;
+  c.pos=(c.pos+dice)%CASHFLOW_BOARD.length;
+  cashflowPushLog(`Você tirou ${dice} no dado e caiu em "${CASHFLOW_BOARD[c.pos].label}".`);
+  cashflowResolveSquare(CASHFLOW_BOARD[c.pos].type);
+  save();
+  render();
+}
+
+function cashflowResolveSquare(type){
+  const c=st.cashflow;
+  if(type==='salary'){
+    c.cash+=c.salary;
+    cashflowPushLog(`Salário recebido: +R$${c.salary}. Caixa agora: R$${c.cash}.`);
+    return;
+  }
+  if(type==='expense'){
+    const val=300+Math.floor(Math.random()*900);
+    c.cash=Math.max(0,c.cash-val);
+    cashflowPushLog(`Despesa inesperada: -R$${val}.`);
+    return;
+  }
+  if(type==='charity'){
+    const donation=Math.min(c.cash,Math.round(c.salary*0.1));
+    c.cash-=donation;
+    cashflowPushLog(`Caridade: você doou R$${donation}.`);
+    return;
+  }
+  if(type==='market'){
+    const swing=[-300,-150,0,200,350][Math.floor(Math.random()*5)];
+    c.cash=Math.max(0,c.cash+swing);
+    cashflowPushLog(`Mercado: variação de caixa ${swing>=0?'+':''}R$${swing}.`);
+    return;
+  }
+  if(type==='smallDeal'){
+    const deals=[
+      {name:'Kit e-commerce local',cost:1200,cashflow:180},
+      {name:'Mini vending machine',cost:1800,cashflow:260},
+      {name:'Painel solar compartilhado',cost:2500,cashflow:340},
+      {name:'Micro franquia digital',cost:3200,cashflow:500},
+    ];
+    const d=deals[Math.floor(Math.random()*deals.length)];
+    if(c.cash>=d.cost){
+      c.cash-=d.cost;
+      c.passive+=d.cashflow;
+      c.assets.push(d);
+      cashflowPushLog(`Você comprou "${d.name}" por R$${d.cost} e ganhou +R$${d.cashflow}/mês de passivo.`);
+    }else{
+      cashflowPushLog(`Oportunidade perdida (${d.name}): faltou caixa para investir R$${d.cost}.`);
+    }
+    return;
+  }
+}
+
+function cashflowAdvanceMonth(){
+  const c=st.cashflow;
+  const cs=cashflowStats();
+  const monthResult=(c.salary+c.passive)-c.expenses;
+  c.cash=Math.max(0,c.cash+monthResult);
+  c.month+=1;
+  if(c.debts>0&&c.cash>0){
+    const pay=Math.min(c.cash,Math.round(c.debts*0.2));
+    c.cash-=pay;c.debts-=pay;
+    cashflowPushLog(`Amortização de dívidas: -R$${pay}. Dívida restante: R$${c.debts}.`);
+  }
+  if(c.passive>=c.expenses&&!c.escaped){
+    c.escaped=true;
+    st.xp+=150;
+    toast('🏁 Liberdade financeira atingida! +150 XP');
+    cashflowPushLog('Você saiu da corrida dos ratos! Agora está na via rápida.');
+  }else{
+    cashflowPushLog(`Fechamento mensal: ${monthResult>=0?'+':''}R$${monthResult} de fluxo líquido.`);
+  }
+  if(cs.freeCash<0&&c.cash===0)cashflowPushLog('⚠ Caixa zerado. Priorize ativos de renda passiva.');
+  save();
+  updateTop();
+  render();
+}
+
+function cashflowReset(){
+  if(!confirm('Reiniciar a partida de Cashflow teste?'))return;
+  st.cashflow={playerName:'Jogador',pos:0,month:1,salary:2500,passive:0,expenses:2000,cash:3000,debts:5000,assets:[],log:['Bem-vindo ao modo de teste Cashflow!'],escaped:false};
+  save();
+  render();
+}
 
 /* ═══════════════════════════════════════════════════
    TIMER
