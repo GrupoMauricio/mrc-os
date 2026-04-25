@@ -1,22 +1,517 @@
 <!DOCTYPE html>
-<html lang="pt">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Cashflow</title>
-    <style>
-      * { margin: 0; padding: 0; box-sizing: border-box; }
-      html, body, #root {
-        width: 100%;
-        height: 100%;
-        height: 100dvh;
-        overflow: hidden;
-        background: #000;
-      }
-    </style>
-    <script type="module" crossorigin src="/cashflow/assets/index-9b6b7927.js"></script>
-  </head>
-  <body>
-    <div id="root"></div>
-  </body>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Cashflow - Jogo Original</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body,#root{width:100%;height:100%;height:100dvh;overflow:hidden;background:#000}
+body{font-family:-apple-system,BlinkMacSystemFont,sans-serif}
+#boot{position:fixed;inset:0;display:grid;place-items:center;background:#000;color:#FFD60A;font-family:-apple-system,BlinkMacSystemFont,sans-serif;z-index:9999}
+#err{display:none;position:fixed;inset:16px;background:#111;color:#fff;z-index:10000;padding:16px;border-radius:12px;overflow:auto;font-family:monospace;white-space:pre-wrap}
+</style>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+<div id="boot">Carregando Cashflow...</div>
+<div id="err"></div>
+<div id="root"></div>
+<script>
+window.addEventListener('error', function(e){
+  var el=document.getElementById('err');
+  el.style.display='block';
+  el.textContent='Erro ao carregar o jogo:\n'+(e.message||e.error||'erro desconhecido')+'\n'+(e.filename||'')+':'+(e.lineno||'');
+});
+</script>
+<script type="text/babel">
+const { useState, useEffect, useRef, useCallback, useMemo } = React;
+
+/* ─── PALETTE ─────────────────────────────────────────────── */
+const C = {
+  black:"#000",bg:"#0A0A0A",card:"#111",card2:"#1A1A1A",card3:"#222",
+  sep:"rgba(255,255,255,0.08)",
+  gold:"#FFD60A",goldDim:"#8A6E00",goldDark:"#3D3000",
+  green:"#30D158",greenDark:"#0D4D1F",
+  red:"#FF453A",redDark:"#3D0D0A",
+  blue:"#0A84FF",purple:"#BF5AF2",orange:"#FF9F0A",teal:"#5AC8FA",
+  t1:"rgba(255,255,255,0.95)",t2:"rgba(255,255,255,0.6)",
+  t3:"rgba(255,255,255,0.3)",t4:"rgba(255,255,255,0.1)",
+  // Board specific
+  boardBg:"#0F1A0F",
+  innerRing:"#1A2E1A",
+  outerRing:"#0D1F2D",
+  ratRace:"#1E3A1E",
+  fastTrack:"#0D2A3D",
+};
+
+/* ─── SOUNDS ─────────────────────────────────────────────── */
+let _actx = null;
+const getCtx = () => { if(!_actx && (window.AudioContext||window.webkitAudioContext)) _actx=new(window.AudioContext||window.webkitAudioContext)(); return _actx; };
+const tone=(f,d,type="sine",vol=0.18,delay=0)=>{try{const ctx=getCtx();if(!ctx)return;const o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.type=type;o.frequency.value=f;const t=ctx.currentTime+delay;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+0.01);g.gain.exponentialRampToValueAtTime(0.001,t+d);o.start(t);o.stop(t+d);}catch(e){}};
+const SFX={
+  roll:()=>{tone(220,.06,"square",.12);setTimeout(()=>tone(280,.06,"square",.12),80);setTimeout(()=>tone(350,.08,"square",.1),160);},
+  dice:()=>{[0,60,120,180,240,300].forEach(d=>setTimeout(()=>tone(180+Math.random()*80,.04,"square",.08),d));},
+  land:()=>{tone(440,.12,"sine",.15);setTimeout(()=>tone(550,.2,"sine",.12),120);},
+  buy:()=>{[0,100,200].forEach((d,i)=>setTimeout(()=>tone([523,659,784][i],.15,"sine",.2),d));},
+  payday:()=>{[0,80,160,240].forEach((d,i)=>setTimeout(()=>tone([523,659,784,1047][i],.18,"sine",.22),d));},
+  doodad:()=>{tone(220,.25,"sawtooth",.15);setTimeout(()=>tone(180,.3,"sawtooth",.12),200);},
+  miss:()=>{tone(300,.1,"sine",.1);setTimeout(()=>tone(220,.2,"sine",.1),100);},
+  milestone:()=>{[0,120,240,360,480].forEach((d,i)=>setTimeout(()=>tone([523,659,784,880,1047][i],.2,"sine",.25),d));},
+  victory:()=>{[0,100,200,300,400,500,600].forEach((d,i)=>setTimeout(()=>tone([523,587,659,698,784,880,1047][i],.25,"sine",.3),d));},
+  baby:()=>{tone(880,.1,"sine",.15);setTimeout(()=>tone(988,.15,"sine",.12),120);},
+  fired:()=>{tone(150,.4,"sawtooth",.2);},
+  tab:()=>{tone(660,.06,"sine",.08);},
+  modal:()=>{tone(440,.08,"sine",.1);},
+  skip:()=>{tone(330,.15,"square",.1);},
+  move:()=>{tone(500,.05,"square",.07);},
+  fastTrack:()=>{[0,150,300,450,600].forEach((d,i)=>setTimeout(()=>tone([784,880,988,1047,1175][i],.2,"sine",.3),d));},
+};
+
+/* ─── I18N ────────────────────────────────────────────────── */
+const TR = {
+  pt:{
+    welcome:"Cashflow",tagline:"Saia da corrida dos ratos",
+    chooseLanguage:"Escolha o idioma",chooseProfession:"Sua profissão",
+    profSubtitle:"Define seu salário e despesas iniciais",start:"Começar",
+    cashflow:"Fluxo de Caixa",income:"Renda",expenses:"Despesas",
+    freedom:"Liberdade Financeira",passive:"Passiva",goal:"Meta",
+    savings:"Poupança",assets:"Ativos",liabilities:"Passivos",children:"Filhos",
+    roll:"🎲 Rolar Dados",rolling:"Rolando…",rolled:"Encerrado",
+    skip:"⏭ Pular",square:"Casa",buy:"Comprar",pass:"Passar",
+    accept:"Aceitar",collect:"Coletar",apply:"Aplicar",ok:"OK",
+    insufficient:"Saldo insuficiente",yourSavings:"Sua poupança",
+    totalCost:"Custo",down:"Entrada",monthly:"Renda/mês",type:"Tipo",
+    debt:"Nova dívida",cost:"Custo",portfolioImpact:"Impacto",
+    noImpact:"Nenhum ativo afetado",youGet:"Você coleta",perMonth:"por mês",
+    fired:"Pula 2 turnos",newChild:"+1 filho +R$800/mês",donate:"Doe 10% CF",
+    board:"Tabuleiro",sheet:"Ficha",log:"Histórico",
+    victory:"🏆 Liberdade Financeira!",victoryDesc:"Você saiu da corrida dos ratos.",
+    passiveLabel:"Renda Passiva",expLabel:"Despesas Totais",again:"Jogar Novamente",
+    ms25:"🌱 Saindo da corrida…",ms50:"🔥 Na metade!",ms75:"⚡ Quase lá!",ms100:"🏆 Livre!",
+    missedOpp:"Oportunidade perdida.",missedCost:"Custo da inação:",
+    boldMove:"Movimento ousado! 🚀",boldDesc:"Projeção em 12 rodadas:",
+    round:"Rodada",skipped:"Turno pulado",noHistory:"Nenhuma ação ainda",
+    passedPayday:"PAYDAY",progress:"Progresso",netWorth:"Patrimônio",
+    milestoneUnlocked:"Marco desbloqueado!",
+    markers:["Empregado","Investidor","Semi-livre","Livre"],
+    ratRaceLabel:"CORRIDA DOS RATOS",fastTrackLabel:"PISTA RÁPIDA",
+    expSection:"Despesas Mensais",assetsSection:"Ativos",profCard:"Profissão",
+    totalAssets:"Ativos",totalLiab:"Passivos",
+    cardOpportunity:"OPORTUNIDADE",cardMarket:"MERCADO",
+    cardDoodad:"DOODAD",cardPayday:"PAYDAY",
+    enterFastTrack:"🎉 Você entrou na PISTA RÁPIDA!",
+    enterFastDesc:"Sua renda passiva superou suas despesas. Você saiu da corrida dos ratos!",
+  },
+  es:{
+    welcome:"Cashflow",tagline:"Sal de la carrera de ratas",
+    chooseLanguage:"Elige idioma",chooseProfession:"Tu profesión",
+    profSubtitle:"Define tu salario y gastos iniciales",start:"Comenzar",
+    cashflow:"Flujo de Caja",income:"Ingresos",expenses:"Gastos",
+    freedom:"Libertad Financiera",passive:"Pasiva",goal:"Meta",
+    savings:"Ahorros",assets:"Activos",liabilities:"Pasivos",children:"Hijos",
+    roll:"🎲 Tirar Dados",rolling:"Tirando…",rolled:"Terminado",
+    skip:"⏭ Saltar",square:"Casilla",buy:"Comprar",pass:"Pasar",
+    accept:"Aceptar",collect:"Cobrar",apply:"Aplicar",ok:"OK",
+    insufficient:"Saldo insuficiente",yourSavings:"Tus ahorros",
+    totalCost:"Costo",down:"Entrada",monthly:"Ingreso/mes",type:"Tipo",
+    debt:"Nueva deuda",cost:"Costo",portfolioImpact:"Impacto",
+    noImpact:"Ningún activo afectado",youGet:"Cobras",perMonth:"por mes",
+    fired:"Pierde 2 turnos",newChild:"+1 hijo +R$800/mes",donate:"Dona 10% FC",
+    board:"Tablero",sheet:"Ficha",log:"Historial",
+    victory:"🏆 ¡Libertad Financiera!",victoryDesc:"Saliste de la carrera de ratas.",
+    passiveLabel:"Ingreso Pasivo",expLabel:"Gastos Totales",again:"Jugar de Nuevo",
+    ms25:"🌱 Saliendo…",ms50:"🔥 ¡A mitad!",ms75:"⚡ ¡Casi!",ms100:"🏆 ¡Libre!",
+    missedOpp:"Oportunidad perdida.",missedCost:"Costo de inacción:",
+    boldMove:"¡Movimiento audaz! 🚀",boldDesc:"Proyección en 12 rondas:",
+    round:"Ronda",skipped:"Turno saltado",noHistory:"Sin acciones aún",
+    passedPayday:"DÍA DE PAGO",progress:"Progreso",netWorth:"Patrimonio",
+    milestoneUnlocked:"¡Hito desbloqueado!",
+    markers:["Empleado","Inversor","Semi-libre","Libre"],
+    ratRaceLabel:"CARRERA DE RATAS",fastTrackLabel:"PISTA RÁPIDA",
+    expSection:"Gastos Mensuales",assetsSection:"Activos",profCard:"Profesión",
+    totalAssets:"Activos",totalLiab:"Pasivos",
+    cardOpportunity:"OPORTUNIDAD",cardMarket:"MERCADO",
+    cardDoodad:"GASTO",cardPayday:"DÍA DE PAGO",
+    enterFastTrack:"🎉 ¡Entraste en PISTA RÁPIDA!",
+    enterFastDesc:"Tu ingreso pasivo superó tus gastos. ¡Saliste de la carrera!",
+  }
+};
+
+/* ─── DATA ────────────────────────────────────────────────── */
+const PROFESSIONS = [
+  {key:"janitor",color:C.green,name:{pt:"Zelador",es:"Conserje"},salary:1600,savings:560,expenses:[{desc:"Impostos",value:280},{desc:"Aluguel",value:200},{desc:"Carro",value:60},{desc:"Cartão",value:60},{desc:"Outros",value:300},{desc:"Filho",value:0}],liabilities:[{name:"Hipoteca",value:20000},{name:"Carro",value:4000},{name:"Cartão",value:2000},{name:"Varejo",value:1000}]},
+  {key:"secretary",color:C.blue,name:{pt:"Secretária",es:"Secretaria"},salary:2500,savings:710,expenses:[{desc:"Impostos",value:460},{desc:"Aluguel",value:400},{desc:"Carro",value:100},{desc:"Cartão",value:60},{desc:"Outros",value:570},{desc:"Filho",value:0}],liabilities:[{name:"Hipoteca",value:38000},{name:"Carro",value:5000},{name:"Cartão",value:3000},{name:"Varejo",value:1000}]},
+  {key:"truck",color:C.orange,name:{pt:"Caminhoneiro",es:"Camionero"},salary:2500,savings:750,expenses:[{desc:"Impostos",value:460},{desc:"Aluguel",value:400},{desc:"Carro",value:140},{desc:"Cartão",value:60},{desc:"Outros",value:580},{desc:"Filho",value:0}],liabilities:[{name:"Hipoteca",value:38000},{name:"Carro",value:6000},{name:"Cartão",value:3000},{name:"Varejo",value:1000}]},
+  {key:"mechanic",color:C.teal,name:{pt:"Mecânico",es:"Mecánico"},salary:2000,savings:670,expenses:[{desc:"Impostos",value:360},{desc:"Aluguel",value:300},{desc:"Carro",value:100},{desc:"Cartão",value:60},{desc:"Outros",value:450},{desc:"Filho",value:0}],liabilities:[{name:"Hipoteca",value:31000},{name:"Carro",value:3000},{name:"Cartão",value:3000},{name:"Varejo",value:1000}]},
+  {key:"nurse",color:C.purple,name:{pt:"Enfermeiro",es:"Enfermero"},salary:3100,savings:480,expenses:[{desc:"Impostos",value:600},{desc:"Aluguel",value:400},{desc:"Carro",value:100},{desc:"Cartão",value:90},{desc:"Empréstimo",value:60},{desc:"Outros",value:710},{desc:"Filho",value:0}],liabilities:[{name:"Hipoteca",value:47000},{name:"Carro",value:5000},{name:"Cartão",value:4000},{name:"Educação",value:6000},{name:"Varejo",value:1000}]},
+  {key:"engineer",color:C.gold,name:{pt:"Engenheiro",es:"Ingeniero"},salary:4900,savings:400,expenses:[{desc:"Impostos",value:1050},{desc:"Aluguel",value:700},{desc:"Carro",value:140},{desc:"Cartão",value:120},{desc:"Empréstimo",value:60},{desc:"Outros",value:1090},{desc:"Filho",value:0}],liabilities:[{name:"Hipoteca",value:75000},{name:"Carro",value:7000},{name:"Cartão",value:4000},{name:"Educação",value:12000},{name:"Varejo",value:1000}]},
+  {key:"doctor",color:C.red,name:{pt:"Médico",es:"Médico"},salary:13200,savings:400,expenses:[{desc:"Impostos",value:3420},{desc:"Aluguel",value:1900},{desc:"Carro",value:380},{desc:"Cartão",value:270},{desc:"Empréstimo",value:750},{desc:"Outros",value:2880},{desc:"Filho",value:0}],liabilities:[{name:"Hipoteca",value:202000},{name:"Carro",value:19000},{name:"Cartão",value:9000},{name:"Educação",value:150000},{name:"Varejo",value:1000}]},
+];
+
+const SQLAB={pt:{opp:"OP",market:"MK",doodad:"DD",payday:"$",charity:"❤",baby:"👶",downsize:"⚠"},es:{opp:"OP",market:"MK",doodad:"GT",payday:"$",charity:"❤",baby:"👶",downsize:"⚠"}};
+const RAT_SQUARES=["payday","opp","doodad","market","opp","charity","payday","doodad","opp","baby","market","doodad","payday","opp","downsize","market","opp","doodad","payday","opp","market","doodad","opp","payday"];
+const FAST_SQUARES=["biz","dream","market","biz","cash","biz","dream","market","biz","cash","dream","biz"];
+
+const CARDS={
+  opp:[
+    {title:{pt:"Ações da Startup",es:"Acciones Startup"},desc:{pt:"Empresa promissora antes do IPO.",es:"Empresa prometedora antes del IPO."},cost:1000,cashflow:0,type:"paper",symbol:"STK",units:1000,roi:0,potential:20000},
+    {title:{pt:"Apartamento 2 quartos",es:"Apartamento 2 hab"},desc:{pt:"Imóvel para aluguel.",es:"Inmueble para alquiler."},cost:5000,cashflow:240,type:"realestate",symbol:"APT",roi:58,potential:15000},
+    {title:{pt:"Franquia Pequena",es:"Franquicia pequeña"},desc:{pt:"Negócio local com gerente.",es:"Negocio local con gerente."},cost:12000,cashflow:800,type:"business",symbol:"FRQ",roi:80,potential:30000},
+    {title:{pt:"Máquina de Vendas",es:"Máquina expendedora"},desc:{pt:"Fluxo de caixa automático.",es:"Flujo de caja automático."},cost:2500,cashflow:180,type:"business",symbol:"VEN",roi:86,potential:6000},
+    {title:{pt:"Terreno Subvalorizado",es:"Terreno infravalorado"},desc:{pt:"Sem renda, grande valorização.",es:"Sin ingresos, gran valorización."},cost:8000,cashflow:0,type:"realestate",symbol:"TER",roi:0,potential:25000},
+    {title:{pt:"Loja Online",es:"Tienda Online"},desc:{pt:"E-commerce automatizado.",es:"E-commerce automatizado."},cost:3500,cashflow:450,type:"business",symbol:"WEB",roi:154,potential:12000},
+    {title:{pt:"Casa de Praia",es:"Casa de Playa"},desc:{pt:"Aluguel temporada.",es:"Alquiler vacacional."},cost:15000,cashflow:600,type:"realestate",symbol:"PRA",roi:48,potential:40000},
+    {title:{pt:"Fundos Imobiliários",es:"Fondos Inmobiliarios"},desc:{pt:"Dividendos mensais.",es:"Dividendos mensuales."},cost:2000,cashflow:120,type:"paper",symbol:"FII",roi:72,potential:5000},
+  ],
+  market:[
+    {title:{pt:"Mercado em Alta",es:"Mercado en Alza"},desc:{pt:"Venda ações por 3x o valor.",es:"Vende acciones por 3x."},affects:"paper",mult:3},
+    {title:{pt:"Bolha Imobiliária",es:"Burbuja Inmobiliaria"},desc:{pt:"Imóveis valem 2x.",es:"Inmuebles valen 2x."},affects:"realestate",mult:2},
+    {title:{pt:"Crise no Varejo",es:"Crisis en Retail"},desc:{pt:"Negócios perdem 50% valor.",es:"Negocios pierden 50%."},affects:"business",mult:.5},
+    {title:{pt:"Oferta de Compra",es:"Oferta de Compra"},desc:{pt:"Comprador paga valor potencial.",es:"Comprador paga valor potencial."},affects:"any",mult:1},
+    {title:{pt:"Juros Caíram",es:"Bajan Intereses"},desc:{pt:"Refinancie: despesas -R$200/mês.",es:"Refinancia: gastos -R$200/mes."},special:"refi"},
+  ],
+  doodad:[
+    {title:{pt:"Novo Celular",es:"Teléfono Nuevo"},cost:1200,desc:{pt:"Upgrade necessário?",es:"¿Upgrade necesario?"}},
+    {title:{pt:"Férias",es:"Vacaciones"},cost:2500,desc:{pt:"Viagem em família.",es:"Viaje familiar."}},
+    {title:{pt:"Manutenção Carro",es:"Mantenimiento Auto"},cost:800,desc:{pt:"Não teve escolha.",es:"No hubo opción."}},
+    {title:{pt:"Curso Online",es:"Curso Online"},cost:600,desc:{pt:"Invista em educação.",es:"Invierte en educación."}},
+    {title:{pt:"Eletrodoméstico",es:"Electrodoméstico"},cost:1500,desc:{pt:"Quebrou a geladeira.",es:"Se rompió la nevera."}},
+  ]
+};
+
+/* ─── UTILS ───────────────────────────────────────────────── */
+const f=(n)=>"R$ "+Math.round(n).toLocaleString("pt-BR");
+const pct=(a,b)=>b?Math.min(100,Math.max(0,(a/b)*100)):0;
+const shuffle=(arr)=>[...arr].sort(()=>Math.random()-.5);
+const getFin=(p)=>{
+  const expBase=p.expenses.reduce((s,e)=>s+e.value,0)+p.children*p.childCost;
+  const liabPay=p.liabilities.reduce((s,l)=>s+(l.payment||0),0);
+  const totalExp=expBase+liabPay;
+  const passive=p.assets.reduce((s,a)=>s+a.cashflow,0)+p.passiveIncomes.reduce((s,i)=>s+i.amount,0);
+  const totalInc=p.salary+passive;
+  const cf=totalInc-totalExp;
+  const netWorth=p.savings+p.assets.reduce((s,a)=>s+(a.value||a.cost||0),0)-p.liabilities.reduce((s,l)=>s+l.value,0);
+  return {totalExp,passive,totalInc,cf,netWorth,progress:pct(passive,totalExp)};
+};
+const milestone=(prog)=>prog>=100?100:prog>=75?75:prog>=50?50:prog>=25?25:0;
+
+/* ─── COMPONENTS ───────────────────────────────────────────── */
+function Money({v,color,size=15}){return <span style={{fontFamily:"SF Mono,Menlo,monospace",fontSize:size,fontWeight:700,color}}>{f(v)}</span>}
+function MiniBar({val,color=C.gold,h=4}){return <div style={{height:h,background:C.t4,borderRadius:99,overflow:"hidden"}}><div style={{width:`${Math.min(100,val)}%`,height:"100%",background:color,borderRadius:99,transition:"width .6s ease"}}/></div>}
+function Badge({children,color=C.gold}){return <span style={{fontSize:9,fontWeight:700,color,background:color+"18",border:`1px solid ${color}30`,borderRadius:12,padding:"3px 7px",letterSpacing:.3}}>{children}</span>}
+function Die({val,rolling}){return <div style={{width:42,height:42,borderRadius:11,background:rolling?C.gold:C.card2,border:`1px solid ${rolling?C.gold:C.sep}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,fontWeight:800,color:rolling?C.black:C.t1,boxShadow:rolling?`0 0 20px ${C.gold}55`:"none",transform:rolling?"rotate(12deg) scale(1.05)":"none",transition:"all .15s"}}>{rolling?"?":val}</div>}
+function ProgressRing({value,size=72,stroke=7}){const r=(size-stroke)/2,c=2*Math.PI*r,off=c*(1-value/100);return <svg width={size} height={size} style={{transform:"rotate(-90deg)"}}><circle cx={size/2} cy={size/2} r={r} fill="none" stroke={C.t4} strokeWidth={stroke}/><circle cx={size/2} cy={size/2} r={r} fill="none" stroke={value>=100?C.green:C.gold} strokeWidth={stroke} strokeLinecap="round" strokeDasharray={c} strokeDashoffset={off} style={{transition:"stroke-dashoffset .7s ease"}}/></svg>}
+
+function Onboarding({onStart}){
+  const [lang,setLang]=useState("pt");
+  const [sel,setSel]=useState(null);
+  const t=TR[lang];
+  return <div style={{background:C.black,minHeight:"100dvh",color:C.t1,fontFamily:"-apple-system,BlinkMacSystemFont,sans-serif",display:"flex",flexDirection:"column",maxWidth:440,margin:"0 auto",overflow:"hidden"}}>
+    <div style={{padding:"44px 24px 20px",textAlign:"center"}}>
+      <div style={{width:70,height:70,borderRadius:20,background:`linear-gradient(135deg,${C.gold},${C.orange})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:32,margin:"0 auto 18px",boxShadow:`0 8px 32px ${C.gold}33`}}>💰</div>
+      <h1 style={{fontSize:42,fontWeight:900,letterSpacing:-2,margin:0,background:`linear-gradient(135deg,${C.gold},#fff)`,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>{t.welcome}</h1>
+      <p style={{color:C.t2,fontSize:15,marginTop:6}}>{t.tagline}</p>
+    </div>
+    <div style={{padding:"0 20px 14px"}}>
+      <div style={{fontSize:11,color:C.t3,textTransform:"uppercase",letterSpacing:1.5,marginBottom:10,fontWeight:700}}>{t.chooseLanguage}</div>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>{[["pt","🇧🇷 Português"],["es","🇪🇸 Español"]].map(([l,label])=><button key={l} onClick={()=>{setLang(l);SFX.tab();}} style={{padding:"13px",borderRadius:14,border:`1.5px solid ${lang===l?C.gold:C.sep}`,background:lang===l?C.gold+"18":C.card,color:lang===l?C.gold:C.t2,fontSize:14,fontWeight:700}}>{label}</button>)}</div>
+    </div>
+    <div style={{padding:"0 20px",flex:1,overflowY:"auto"}}>
+      <div style={{fontSize:11,color:C.t3,textTransform:"uppercase",letterSpacing:1.5,margin:"8px 0 10px",fontWeight:700}}>{t.chooseProfession}</div>
+      <div style={{display:"flex",flexDirection:"column",gap:9,paddingBottom:20}}>
+        {PROFESSIONS.map(p=>{const fin=getFin({...p,profession:p.name[lang],children:0,assets:[],passiveIncomes:[],position:0,log:[]});return <button key={p.key} onClick={()=>{setSel(p);SFX.tab();}} style={{background:sel?.key===p.key?p.color+"18":C.card,border:`1.5px solid ${sel?.key===p.key?p.color:C.sep}`,borderRadius:16,padding:14,textAlign:"left",display:"flex",alignItems:"center",gap:13,color:C.t1}}>
+          <div style={{width:42,height:42,borderRadius:12,background:p.color+"22",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20}}>{p.key==="doctor"?"⚕️":p.key==="engineer"?"⚙️":p.key==="nurse"?"💉":p.key==="mechanic"?"🔧":p.key==="truck"?"🚚":p.key==="secretary"?"💼":"🧹"}</div>
+          <div style={{flex:1}}><div style={{fontSize:16,fontWeight:800,color:sel?.key===p.key?p.color:C.t1}}>{p.name[lang]}</div><div style={{display:"flex",gap:12,marginTop:4,fontSize:11,color:C.t2}}><span>{t.income}: {f(p.salary)}</span><span>CF: {f(fin.cf)}</span></div></div>
+        </button>})}
+      </div>
+    </div>
+    <div style={{padding:"14px 20px 34px",background:"linear-gradient(transparent,#000 20%)"}}><button disabled={!sel} onClick={()=>{SFX.milestone();onStart(sel,lang);}} style={{width:"100%",padding:17,borderRadius:16,border:"none",background:sel?C.gold:C.card2,color:sel?C.black:C.t3,fontSize:17,fontWeight:800}}>{t.start}</button></div>
+  </div>
+}
+
+function BoardTab({player,fin,round,lang,milestoneJust,onMilestoneDismiss}){
+  const t=TR[lang], onFast=player.onFastTrack;
+  const squares=onFast?FAST_SQUARES:RAT_SQUARES;
+  const pos=onFast?player.outerPosition:player.position;
+  const size=360, center=size/2;
+  const innerR=82, outerR=142;
+  const boardR=onFast?outerR:innerR;
+  return <div style={{height:"100%",overflowY:"auto",padding:"12px 16px 100px",background:`radial-gradient(circle at center,${C.boardBg} 0%,${C.black} 70%)`}}>
+    {/* Progress Header */}
+    <div style={{display:"flex",alignItems:"center",gap:14,marginBottom:14,background:"rgba(0,0,0,.35)",border:`1px solid ${C.sep}`,borderRadius:18,padding:14}}>
+      <div style={{position:"relative",width:72,height:72,flexShrink:0}}><ProgressRing value={fin.progress}/><div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column"}}><span style={{fontSize:18,fontWeight:900,color:fin.progress>=100?C.green:C.gold}}>{Math.round(fin.progress)}%</span></div></div>
+      <div style={{flex:1}}><div style={{fontSize:11,color:C.t3,textTransform:"uppercase",letterSpacing:1.5,marginBottom:4}}>{t.freedom}</div><div style={{fontSize:20,fontWeight:800,color:C.t1}}>{f(fin.passive)} <span style={{color:C.t3,fontSize:14}}>/ {f(fin.totalExp)}</span></div><div style={{display:"flex",justifyContent:"space-between",marginTop:8}}>{t.markers.map((m,i)=><span key={m} style={{fontSize:9,color:fin.progress>=[0,33,66,100][i]?C.gold:C.t4}}>{m}</span>)}</div></div>
+    </div>
+
+    {/* Board */}
+    <div style={{position:"relative",width:size,height:size,margin:"8px auto 18px"}}>
+      {/* Fast track outer label */}
+      <div style={{position:"absolute",top:8,left:0,right:0,textAlign:"center",fontSize:9,fontWeight:800,color:C.blue,letterSpacing:2,opacity:onFast?1:.4}}>{t.fastTrackLabel}</div>
+      <svg width={size} height={size} style={{position:"absolute",inset:0}}>
+        <circle cx={center} cy={center} r={outerR} fill="none" stroke={C.fastTrack} strokeWidth="36" opacity={onFast?1:.45}/>
+        <circle cx={center} cy={center} r={innerR} fill="none" stroke={C.ratRace} strokeWidth="42" opacity={onFast?.35:1}/>
+        <circle cx={center} cy={center} r={44} fill={C.black} stroke={C.goldDark} strokeWidth="2"/>
+      </svg>
+      {/* Rat race squares */}
+      {RAT_SQUARES.map((sq,i)=>{const a=(i/RAT_SQUARES.length)*Math.PI*2-Math.PI/2,x=center+Math.cos(a)*innerR,y=center+Math.sin(a)*innerR,active=!onFast&&i===pos;const col=sq==="payday"?C.green:sq==="opp"?C.gold:sq==="market"?C.blue:sq==="doodad"?C.red:sq==="charity"?C.purple:sq==="baby"?C.orange:C.red;return <div key={i} style={{position:"absolute",left:x-15,top:y-15,width:30,height:30,borderRadius:active?"50%":8,background:active?C.gold:col+"22",border:`1.5px solid ${active?C.gold:col+"66"}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:active?16:12,fontWeight:800,color:active?C.black:col,boxShadow:active?`0 0 18px ${C.gold}`:"none",transition:"all .3s",zIndex:active?5:1}}>{active?"👤":SQLAB[lang][sq]}</div>})}
+      {/* Fast track squares */}
+      {FAST_SQUARES.map((sq,i)=>{const a=(i/FAST_SQUARES.length)*Math.PI*2-Math.PI/2,x=center+Math.cos(a)*outerR,y=center+Math.sin(a)*outerR,active=onFast&&i===pos;const col=sq==="cash"?C.green:sq==="dream"?C.purple:sq==="biz"?C.gold:C.blue;return <div key={i} style={{position:"absolute",left:x-17,top:y-17,width:34,height:34,borderRadius:active?"50%":9,background:active?C.gold:col+"22",border:`1.5px solid ${active?C.gold:col+"66"}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:active?17:13,fontWeight:800,color:active?C.black:col,boxShadow:active?`0 0 22px ${C.gold}`:"none",opacity:onFast?1:.5,zIndex:active?6:1}}>{active?"🏃":sq==="cash"?"$":sq==="dream"?"★":sq==="biz"?"B":"M"}</div>})}
+      {/* Center */}
+      <div style={{position:"absolute",left:center-54,top:center-54,width:108,height:108,borderRadius:"50%",background:`linear-gradient(135deg,${C.goldDark},${C.black})`,border:`2px solid ${C.goldDim}`,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",textAlign:"center"}}>
+        <div style={{fontSize:26}}>🐀</div>
+        <div style={{fontSize:9,fontWeight:900,color:C.gold,letterSpacing:1.5,marginTop:2}}>{onFast?"LIVRE":"RAT RACE"}</div>
+        <div style={{fontSize:20,fontWeight:900,color:C.t1,marginTop:2}}>#{pos}</div>
+      </div>
+    </div>
+
+    {/* Current Square */}
+    <div style={{background:C.card,border:`1px solid ${C.sep}`,borderRadius:18,padding:15,marginBottom:12}}>
+      <div style={{fontSize:10,color:C.t3,textTransform:"uppercase",letterSpacing:1.5,marginBottom:6}}>{t.square} Atual</div>
+      <div style={{display:"flex",alignItems:"center",gap:12}}><div style={{fontSize:32}}>{onFast?"🏁":RAT_SQUARES[pos]==="payday"?"💵":RAT_SQUARES[pos]==="opp"?"💼":RAT_SQUARES[pos]==="market"?"📈":RAT_SQUARES[pos]==="doodad"?"🛍":RAT_SQUARES[pos]==="charity"?"❤️":RAT_SQUARES[pos]==="baby"?"👶":"⚠️"}</div><div><div style={{fontSize:18,fontWeight:800,color:C.t1}}>{onFast?FAST_SQUARES[pos].toUpperCase():SQLAB[lang][RAT_SQUARES[pos]]}</div><div style={{fontSize:12,color:C.t2,marginTop:2}}>{onFast?"Pista rápida: negócios grandes e sonhos":"Corrida dos ratos: construa renda passiva"}</div></div></div>
+    </div>
+
+    {milestoneJust&&<MilestoneToast milestone={milestoneJust} lang={lang} onClose={onMilestoneDismiss}/>}    
+  </div>
+}
+
+function MilestoneToast({milestone,lang,onClose}){const t=TR[lang];useEffect(()=>{SFX.milestone();const id=setTimeout(onClose,2500);return()=>clearTimeout(id)},[]);return <div style={{position:"fixed",top:80,left:20,right:20,maxWidth:400,margin:"0 auto",background:`linear-gradient(135deg,${C.gold},${C.orange})`,borderRadius:18,padding:18,zIndex:100,color:C.black,boxShadow:`0 10px 40px ${C.gold}55`,textAlign:"center"}}><div style={{fontSize:28,marginBottom:6}}>🎉</div><div style={{fontSize:11,fontWeight:900,letterSpacing:1.5,textTransform:"uppercase"}}>{t.milestoneUnlocked}</div><div style={{fontSize:18,fontWeight:900,marginTop:4}}>{t[`ms${milestone}`]}</div></div>}
+
+function CFStrip({fin,lang,t}){return <div style={{background:C.card,borderTop:`1px solid ${C.sep}`,borderBottom:`1px solid ${C.sep}`,padding:"9px 16px",display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10}}>
+  <div><div style={{fontSize:9,color:C.t3,textTransform:"uppercase",letterSpacing:1}}>{t.passive}</div><Money v={fin.passive} color={C.green} size={14}/></div>
+  <div><div style={{fontSize:9,color:C.t3,textTransform:"uppercase",letterSpacing:1}}>{t.expenses}</div><Money v={fin.totalExp} color={C.red} size={14}/></div>
+  <div><div style={{fontSize:9,color:C.t3,textTransform:"uppercase",letterSpacing:1}}>CF</div><Money v={fin.cf} color={fin.cf>=0?C.green:C.red} size={14}/></div>
+</div>}
+
+function SheetTab({player,fin,lang,t}){
+  return <div style={{height:"100%",overflowY:"auto",padding:"14px 16px 100px",background:C.black}}>
+    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:12}}>
+      <StatCard label={t.savings} value={f(player.savings)} color={C.gold}/>
+      <StatCard label={t.netWorth} value={f(fin.netWorth)} color={fin.netWorth>=0?C.green:C.red}/>
+      <StatCard label={t.income} value={f(fin.totalInc)} color={C.green}/>
+      <StatCard label={t.expenses} value={f(fin.totalExp)} color={C.red}/>
+    </div>
+    <Section title={t.expSection}>
+      {player.expenses.map((e,i)=><Row key={i} label={e.desc} value={f(e.value)} color={C.red}/>) }
+      {player.children>0&&<Row label={`${t.children} (${player.children})`} value={f(player.children*player.childCost)} color={C.red}/>}      
+    </Section>
+    <Section title={t.assetsSection}>
+      {player.assets.length===0?<Empty text="Nenhum ativo ainda"/>:player.assets.map((a,i)=><div key={i} style={{padding:"11px 0",borderBottom:`1px solid ${C.sep}`}}><div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}><div><div style={{fontSize:14,fontWeight:700,color:C.t1}}>{a.title}</div><div style={{fontSize:10,color:C.t3,marginTop:2}}>{a.type} · {a.symbol}</div></div><Money v={a.cashflow} color={C.green} size={13}/></div></div>)}
+    </Section>
+    <Section title={t.liabilities}>
+      {player.liabilities.map((l,i)=><Row key={i} label={l.name} value={f(l.value)} color={C.red}/>) }
+    </Section>
+  </div>
+}
+function StatCard({label,value,color}){return <div style={{background:C.card,border:`1px solid ${C.sep}`,borderRadius:16,padding:14}}><div style={{fontSize:10,color:C.t3,textTransform:"uppercase",letterSpacing:1,marginBottom:6}}>{label}</div><div style={{fontSize:18,fontWeight:800,color}}>{value}</div></div>}
+function Section({title,children}){return <div style={{background:C.card,border:`1px solid ${C.sep}`,borderRadius:16,padding:14,marginBottom:12}}><div style={{fontSize:11,color:C.gold,textTransform:"uppercase",letterSpacing:1.5,fontWeight:800,marginBottom:10}}>{title}</div>{children}</div>}
+function Row({label,value,color}){return <div style={{display:"flex",justifyContent:"space-between",padding:"9px 0",borderBottom:`1px solid ${C.sep}`}}><span style={{fontSize:13,color:C.t2}}>{label}</span><span style={{fontSize:13,fontWeight:700,color,fontFamily:"SF Mono,monospace"}}>{value}</span></div>}
+function Empty({text}){return <div style={{padding:20,textAlign:"center",color:C.t3,fontSize:13}}>{text}</div>}
+function LogTab({log,t}){return <div style={{height:"100%",overflowY:"auto",padding:"14px 16px 100px",background:C.black}}>{log.length===0?<Empty text={t.noHistory}/>:<div style={{display:"flex",flexDirection:"column",gap:8}}>{[...log].reverse().map((l,i)=><div key={i} style={{background:C.card,border:`1px solid ${C.sep}`,borderRadius:14,padding:12,fontSize:13,color:l.color||C.t2,lineHeight:1.4}}>{l.text}</div>)}</div>}</div>}
+
+function ActionModal({card,sqType,player,lang,fin,onAction,onSkip}){
+  const t=TR[lang];
+  const isOpp=sqType==="opp", isMarket=sqType==="market", isDoodad=sqType==="doodad", isPayday=sqType==="payday";
+  const color=isOpp?C.gold:isMarket?C.blue:isDoodad?C.red:C.green;
+  const canAfford=!isOpp||player.savings>=card.cost;
+  return <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.85)",zIndex:80,display:"flex",alignItems:"flex-end",justifyContent:"center",padding:16}} onClick={onSkip}>
+    <div onClick={e=>e.stopPropagation()} style={{width:"100%",maxWidth:408,background:C.card,border:`1px solid ${color}55`,borderRadius:24,padding:20,boxShadow:`0 -10px 50px ${color}22`,animation:"modalIn .25s ease"}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:14}}><Badge color={color}>{isOpp?t.cardOpportunity:isMarket?t.cardMarket:isDoodad?t.cardDoodad:t.cardPayday}</Badge><button onClick={onSkip} style={{background:"none",border:"none",color:C.t3,fontSize:24}}>×</button></div>
+      <h2 style={{fontSize:24,fontWeight:900,color:C.t1,margin:"0 0 6px"}}>{card.title?.[lang]||card.title}</h2>
+      <p style={{fontSize:14,color:C.t2,lineHeight:1.5,marginBottom:18}}>{card.desc?.[lang]||card.desc}</p>
+      {isOpp&&<div style={{background:C.black,borderRadius:16,padding:14,marginBottom:16}}>
+        <InfoRow label={t.totalCost} value={f(card.cost)} color={C.red}/><InfoRow label={t.monthly} value={`+${f(card.cashflow)}`} color={C.green}/><InfoRow label="ROI" value={`${card.roi}%`} color={C.gold}/><InfoRow label={t.yourSavings} value={f(player.savings)} color={canAfford?C.green:C.red}/>
+      </div>}
+      {isMarket&&<MarketPreview card={card} player={player} lang={lang}/>}      
+      {isDoodad&&<div style={{background:C.black,borderRadius:16,padding:14,marginBottom:16}}><InfoRow label={t.cost} value={f(card.cost)} color={C.red}/><InfoRow label={t.yourSavings} value={f(player.savings)} color={player.savings>=card.cost?C.green:C.red}/></div>}
+      {isPayday&&<div style={{textAlign:"center",padding:12,marginBottom:16}}><div style={{fontSize:42}}>💰</div><div style={{fontSize:28,fontWeight:900,color:C.green,marginTop:4}}>{f(fin.cf)}</div><div style={{fontSize:13,color:C.t2,marginTop:4}}>{t.youGet}</div></div>}
+      <div style={{display:"flex",gap:10}}>
+        {!isPayday&&<button onClick={onSkip} style={{flex:1,padding:15,borderRadius:15,border:`1px solid ${C.sep}`,background:C.card2,color:C.t2,fontSize:15,fontWeight:700}}>{t.pass}</button>}
+        <button onClick={()=>onAction(card)} disabled={isOpp&&!canAfford} style={{flex:1,padding:15,borderRadius:15,border:"none",background:(isOpp&&!canAfford)?C.card2:color,color:(isOpp&&!canAfford)?C.t3:(isDoodad||isMarket?C.t1:C.black),fontSize:15,fontWeight:800}}>{isPayday?t.collect:isOpp?t.buy:t.apply}</button>
+      </div>
+      {isOpp&&!canAfford&&<div style={{textAlign:"center",color:C.red,fontSize:12,marginTop:10}}>{t.insufficient}</div>}
+    </div>
+    <style>{`@keyframes modalIn{from{transform:translateY(40px);opacity:0}to{transform:translateY(0);opacity:1}}`}</style>
+  </div>
+}
+function InfoRow({label,value,color}){return <div style={{display:"flex",justifyContent:"space-between",padding:"7px 0",borderBottom:`1px solid ${C.sep}`}}><span style={{color:C.t3,fontSize:12}}>{label}</span><span style={{color,fontSize:14,fontWeight:800,fontFamily:"SF Mono,monospace"}}>{value}</span></div>}
+function MarketPreview({card,player,lang}){const t=TR[lang];let affected=player.assets.filter(a=>card.affects==="any"||a.type===card.affects);return <div style={{background:C.black,borderRadius:16,padding:14,marginBottom:16}}><div style={{fontSize:12,color:C.t3,marginBottom:8}}>{t.portfolioImpact}</div>{affected.length===0?<div style={{color:C.t3,fontSize:13,padding:10,textAlign:"center"}}>{t.noImpact}</div>:affected.map((a,i)=><div key={i} style={{display:"flex",justifyContent:"space-between",padding:"7px 0"}}><span style={{color:C.t2,fontSize:13}}>{a.title}</span><span style={{color:C.green,fontWeight:800}}>{f(card.special?0:(a.potential||a.cost)*card.mult)}</span></div>)}</div>}
+
+function MissedModal({card,lang,onClose}){const t=TR[lang];useEffect(()=>{SFX.miss()},[]);return <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.85)",zIndex:90,display:"flex",alignItems:"center",justifyContent:"center",padding:20}}><div style={{background:C.card,border:`1px solid ${C.red}44`,borderRadius:24,padding:24,maxWidth:380,textAlign:"center"}}><div style={{fontSize:46}}>😬</div><h2 style={{color:C.t1,fontSize:22,margin:"10px 0 8px"}}>{t.missedOpp}</h2><p style={{color:C.t2,fontSize:14,lineHeight:1.5}}>{card.title[lang]}</p><div style={{margin:"18px 0",background:C.red+"14",borderRadius:14,padding:14}}><div style={{fontSize:11,color:C.t3,textTransform:"uppercase"}}>{t.missedCost}</div><div style={{fontSize:24,fontWeight:900,color:C.red,marginTop:4}}>{f(card.cashflow*12)}/ano</div></div><button onClick={onClose} style={{width:"100%",padding:14,borderRadius:14,border:"none",background:C.card2,color:C.t1,fontWeight:700}}>{t.ok}</button></div></div>}
+function BoldMoveModal({card,lang,onClose}){const t=TR[lang];useEffect(()=>{SFX.buy()},[]);return <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.85)",zIndex:90,display:"flex",alignItems:"center",justifyContent:"center",padding:20}}><div style={{background:C.card,border:`1px solid ${C.green}44`,borderRadius:24,padding:24,maxWidth:380,textAlign:"center"}}><div style={{fontSize:46}}>🚀</div><h2 style={{color:C.green,fontSize:22,margin:"10px 0 8px"}}>{t.boldMove}</h2><p style={{color:C.t2,fontSize:14}}>{card.title[lang]}</p><div style={{margin:"18px 0",background:C.green+"14",borderRadius:14,padding:14}}><div style={{fontSize:11,color:C.t3,textTransform:"uppercase"}}>{t.boldDesc}</div><div style={{fontSize:24,fontWeight:900,color:C.green,marginTop:4}}>{f(card.cashflow*12)}</div></div><button onClick={onClose} style={{width:"100%",padding:14,borderRadius:14,border:"none",background:C.green,color:C.black,fontWeight:800}}>{t.ok}</button></div></div>}
+function FastTrackModal({lang,onClose}){const t=TR[lang];useEffect(()=>{SFX.fastTrack()},[]);return <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.92)",zIndex:95,display:"flex",alignItems:"center",justifyContent:"center",padding:20}}><div style={{background:`linear-gradient(135deg,${C.goldDark},${C.black})`,border:`2px solid ${C.gold}`,borderRadius:28,padding:28,maxWidth:390,textAlign:"center",boxShadow:`0 0 60px ${C.gold}44`}}><div style={{fontSize:64,marginBottom:12}}>🏁</div><h2 style={{color:C.gold,fontSize:26,fontWeight:900,margin:"0 0 10px"}}>{t.enterFastTrack}</h2><p style={{color:C.t2,fontSize:15,lineHeight:1.5,marginBottom:24}}>{t.enterFastDesc}</p><button onClick={onClose} style={{width:"100%",padding:16,borderRadius:16,border:"none",background:C.gold,color:C.black,fontSize:16,fontWeight:900}}>Entrar na Pista Rápida</button></div></div>}
+function VictoryScreen({player,fin,lang,onRestart}){const t=TR[lang];useEffect(()=>{SFX.victory();confetti()},[]);return <div style={{position:"fixed",inset:0,background:`radial-gradient(circle,${C.goldDark},${C.black} 70%)`,zIndex:100,display:"flex",alignItems:"center",justifyContent:"center",padding:24,color:C.t1}}><div style={{textAlign:"center",maxWidth:380}}><div style={{fontSize:80,marginBottom:16}}>🏆</div><h1 style={{fontSize:32,fontWeight:900,color:C.gold,margin:"0 0 10px"}}>{t.victory}</h1><p style={{fontSize:16,color:C.t2,marginBottom:28,lineHeight:1.5}}>{t.victoryDesc}</p><div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:28}}><StatCard label={t.passiveLabel} value={f(fin.passive)} color={C.green}/><StatCard label={t.expLabel} value={f(fin.totalExp)} color={C.red}/></div><button onClick={onRestart} style={{width:"100%",padding:17,borderRadius:16,border:"none",background:C.gold,color:C.black,fontSize:17,fontWeight:900}}>{t.again}</button></div></div>}
+function confetti(){for(let i=0;i<50;i++){setTimeout(()=>{const d=document.createElement("div");d.textContent=["🎉","✨","💰","🏆"][Math.floor(Math.random()*4)];d.style.cssText=`position:fixed;top:-20px;left:${Math.random()*100}%;font-size:${20+Math.random()*20}px;z-index:200;pointer-events:none;animation:fall ${2+Math.random()*2}s linear forwards`;document.body.appendChild(d);setTimeout(()=>d.remove(),4000)},i*30)}const s=document.createElement("style");s.textContent="@keyframes fall{to{transform:translateY(110vh) rotate(720deg);opacity:0}}";document.head.appendChild(s)}
+
+function GameScreen({initPlayer,lang,onRestart}){
+  const [player,setPlayer]=useState(initPlayer);
+  const [tab,setTab]=useState(0);
+  const [dice,setDice]=useState([1,1]);
+  const [rolling,setRolling]=useState(false);
+  const [hasRolled,setHasRolled]=useState(false);
+  const [round,setRound]=useState(1);
+  const [actionCard,setActionCard]=useState(null);
+  const [missedCard,setMissedCard]=useState(null);
+  const [boldCard,setBoldCard]=useState(null);
+  const [skipping,setSkipping]=useState(0);
+  const [milestoneJust,setMilestoneJust]=useState(null);
+  const [showFastTrackModal,setShowFastTrackModal]=useState(false);
+  const [victor,setVictor]=useState(false);
+  const prevMilestone=useRef(0);
+  const decks=useRef({opp:shuffle(CARDS.opp),market:shuffle(CARDS.market),doodad:shuffle(CARDS.doodad)});
+  const t=TR[lang], fin=getFin(player);
+  const updP=(fn)=>setPlayer(p=>typeof fn==="function"?fn(p):fn);
+  const draw=(type)=>{let d=decks.current[type];if(!d.length)d=decks.current[type]=shuffle(CARDS[type]);return d.pop();};
+  
+  useEffect(()=>{const m=milestone(fin.progress);if(m>prevMilestone.current&&m>0&&m<100){setMilestoneJust(m);prevMilestone.current=m;}if(fin.progress>=100&&!player.onFastTrack&&!showFastTrackModal){setShowFastTrackModal(true);}if(player.onFastTrack&&fin.progress>=150&&!victor){setVictor(true);}},[fin.progress,player.onFastTrack]);
+  
+  const log=(text,color=C.t2)=>updP(p=>({...p,log:[...p.log,{text,color}]}));
+  const endTurn=()=>{setHasRolled(false);setRound(r=>r+1);};
+  const applySquare=(sq)=>{
+    SFX.land();
+    if(sq==="payday"){SFX.payday();setActionCard({card:{title:{pt:"PAYDAY",es:"DÍA DE PAGO"},desc:{pt:"Receba seu fluxo de caixa mensal.",es:"Recibe tu flujo mensual."}},sqType:"payday"});return;}
+    if(sq==="opp"){SFX.modal();setActionCard({card:draw("opp"),sqType:"opp"});return;}
+    if(sq==="market"){SFX.modal();setActionCard({card:draw("market"),sqType:"market"});return;}
+    if(sq==="doodad"){SFX.doodad();setActionCard({card:draw("doodad"),sqType:"doodad"});return;}
+    if(sq==="charity"){SFX.modal();setActionCard({card:{title:{pt:"Caridade",es:"Caridad"},desc:{pt:"Doe 10% do seu fluxo de caixa para rolar 3 dados nos próximos 3 turnos.",es:"Dona 10% de tu flujo para tirar 3 dados."}},sqType:"charity"});return;}
+    if(sq==="baby"){SFX.baby();updP(p=>({...p,children:p.children+1,log:[...p.log,{text:t.newChild,color:C.orange}]}));endTurn();return;}
+    if(sq==="downsize"){SFX.fired();setSkipping(2);updP(p=>({...p,savings:Math.max(0,p.savings-p.expenses.reduce((s,e)=>s+e.value,0)),log:[...p.log,{text:t.fired,color:C.red}]}));endTurn();return;}
+    // fast track
+    if(["biz","dream"].includes(sq)){setActionCard({card:{title:{pt:sq==="biz"?"Grande Negócio":"Sonho",es:sq==="biz"?"Gran Negocio":"Sueño"},desc:{pt:"Oportunidade da pista rápida.",es:"Oportunidad de pista rápida."},cost:25000,cashflow:3000,type:"business",symbol:"BIG",roi:144,potential:60000},sqType:"opp"});return;}
+    if(sq==="cash"){setActionCard({card:{title:{pt:"Cashflow Extra",es:"Cashflow Extra"},desc:{pt:"Receba 100x seu fluxo de caixa.",es:"Recibe 100x tu flujo."}},sqType:"payday"});return;}
+    if(sq==="market"){setActionCard({card:draw("market"),sqType:"market"});return;}
+  };
+  
+  const roll=()=>{
+    if(rolling||hasRolled)return;
+    if(skipping>0){SFX.skip();setSkipping(s=>s-1);log(t.skipped,C.red);endTurn();return;}
+    SFX.roll();setRolling(true);
+    let count=0;const iv=setInterval(()=>{setDice([1+Math.floor(Math.random()*6),1+Math.floor(Math.random()*6)]);SFX.dice();count++;if(count>=8){clearInterval(iv);const d1=1+Math.floor(Math.random()*6),d2=1+Math.floor(Math.random()*6);setDice([d1,d2]);const sum=d1+d2;setRolling(false);setHasRolled(true);SFX.move();setTimeout(()=>{
+      if(player.onFastTrack){const newPos=(player.outerPosition+sum)%FAST_SQUARES.length;updP(p=>({...p,outerPosition:newPos}));setTimeout(()=>applySquare(FAST_SQUARES[newPos]),300);}
+      else{let newPos=(player.position+sum)%RAT_SQUARES.length;const passed=newPos<player.position;if(passed){updP(p=>({...p,savings:p.savings+fin.cf,position:newPos,log:[...p.log,{text:`${t.passedPayday}: ${f(fin.cf)}`,color:C.green}]}));}else updP(p=>({...p,position:newPos}));setTimeout(()=>applySquare(RAT_SQUARES[newPos]),300);}
+    },200);}},80);
+  };
+  
+  const handleAction=(card)=>{
+    const sqType=actionCard.sqType;
+    if(sqType==="payday"){updP(p=>({...p,savings:p.savings+fin.cf,log:[...p.log,{text:`${t.passedPayday}: ${f(fin.cf)}`,color:C.green}]}));SFX.payday();setActionCard(null);endTurn();return;}
+    if(sqType==="opp"){
+      if(player.savings<card.cost)return;
+      SFX.buy();updP(p=>({...p,savings:p.savings-card.cost,assets:[...p.assets,{...card,value:card.cost}],log:[...p.log,{text:`Comprou: ${card.title[lang]} (+${f(card.cashflow)}/mês)`,color:C.green}]}));
+      if(card.cashflow>=400)setBoldCard(card);
+      setActionCard(null);if(card.cashflow<400)endTurn();return;
+    }
+    if(sqType==="doodad"){
+      SFX.doodad();updP(p=>({...p,savings:p.savings-card.cost,log:[...p.log,{text:`Doodad: ${card.title[lang]} (-${f(card.cost)})`,color:C.red}]}));setActionCard(null);endTurn();return;
+    }
+    if(sqType==="market"){
+      SFX.buy();let gain=0;updP(p=>{let assets=[...p.assets];if(card.special==="refi"){const ex=[...p.expenses];if(ex[0])ex[0]={...ex[0],value:Math.max(0,ex[0].value-200)};return {...p,expenses:ex,log:[...p.log,{text:card.title[lang]+": despesas reduzidas",color:C.green}]};}
+        const affected=assets.filter(a=>card.affects==="any"||a.type===card.affects);
+        if(affected.length){const a=affected[0];gain=(a.potential||a.cost)*card.mult;assets=assets.filter(x=>x!==a);}
+        return {...p,savings:p.savings+gain,assets,log:[...p.log,{text:`${card.title[lang]}: +${f(gain)}`,color:gain>0?C.green:C.t2}]};});
+      setActionCard(null);endTurn();return;
+    }
+    if(sqType==="charity"){
+      const donation=Math.max(0,Math.round(fin.cf*.1));updP(p=>({...p,savings:p.savings-donation,log:[...p.log,{text:`Caridade: -${f(donation)}`,color:C.purple}]}));setActionCard(null);endTurn();return;
+    }
+  };
+  const handleSkip=()=>{if(!actionCard)return;SFX.skip();const {card,sqType}=actionCard;if(sqType==="opp"&&card.cashflow>0)setMissedCard(card);setActionCard(null);if(!(sqType==="opp"&&card.cashflow>0))endTurn();};
+  const diceSum=dice[0]+dice[1], sq=player.onFastTrack?{t:FAST_SQUARES[player.outerPosition],i:"🏁"}:{t:RAT_SQUARES[player.position],i:SQLAB[lang][RAT_SQUARES[player.position]]};
+  const sqCol=sq.t==="payday"||sq.t==="cash"?C.green:sq.t==="opp"||sq.t==="biz"?C.gold:sq.t==="market"?C.blue:sq.t==="doodad"||sq.t==="downsize"?C.red:C.purple;
+  const btnDisabled=rolling||hasRolled||!!actionCard;
+  const btnLabel=rolling?t.rolling:hasRolled?t.rolled:skipping>0?`${t.skip} (${skipping})`:t.roll;
+  const btnBg=rolling?C.card2:hasRolled?C.card2:C.gold, btnFg=hasRolled?C.t3:C.black;
+
+  return (
+    <div style={{background:C.black,height:"100%",display:"flex",flexDirection:"column",fontFamily:"-apple-system,BlinkMacSystemFont,sans-serif",maxWidth:440,margin:"0 auto"}}>
+      {/* NAV */}
+      <div style={{flexShrink:0,display:"flex",alignItems:"center",justifyContent:"space-between",padding:"12px 18px 8px",borderBottom:"0.5px solid rgba(255,255,255,.06)"}}>
+        <div>
+          <div style={{fontSize:9,color:C.t3,textTransform:"uppercase",letterSpacing:1.5,marginBottom:1}}>{t.round} {round}{player.onFastTrack?" · 🏁 PISTA RÁPIDA":""}</div>
+          <div style={{fontSize:15,fontWeight:700,color:player.onFastTrack?C.gold:C.t1}}>{player.profession}</div>
+        </div>
+        <div style={{display:"flex",gap:12,alignItems:"center"}}>
+          <div style={{textAlign:"right"}}><div style={{fontSize:9,color:C.t3,textTransform:"uppercase",letterSpacing:1}}>{t.cashflow}</div><div style={{fontSize:14,fontWeight:700,color:fin.cf>=0?C.green:C.red,marginTop:1}}>{f(fin.cf)}</div></div>
+        </div>
+      </div>
+
+      {/* CONTENT */}
+      <div style={{flex:1,overflow:"hidden",position:"relative"}}>
+        {tab===0&&<BoardTab player={player} fin={fin} round={round} lang={lang} milestoneJust={milestoneJust} onMilestoneDismiss={()=>setMilestoneJust(null)}/>} 
+        {tab===1&&<SheetTab player={player} fin={fin} lang={lang} t={t}/>} 
+        {tab===2&&<LogTab log={player.log} t={t}/>} 
+      </div>
+
+      {/* CF STRIP */}
+      <CFStrip fin={fin} lang={lang} t={t}/>
+
+      {/* DICE */}
+      <div style={{flexShrink:0,background:"#0D0D0D",padding:"10px 16px 8px"}}>
+        <div style={{display:"flex",alignItems:"center",gap:12}}>
+          <div style={{display:"flex",gap:7,flexShrink:0}}><Die val={dice[0]} rolling={rolling}/><Die val={dice[1]} rolling={rolling}/></div>
+          <div style={{flex:1,display:"flex",flexDirection:"column",gap:6}}>
+            <button onClick={roll} disabled={btnDisabled} style={{width:"100%",padding:"12px",background:btnBg,border:"none",borderRadius:14,color:btnFg,fontSize:15,fontWeight:800,cursor:btnDisabled?"default":"pointer",fontFamily:"-apple-system,sans-serif",transition:"all .2s",boxShadow:!rolling&&!hasRolled&&!skipping?`0 4px 18px ${C.gold}44`:"none"}}>{btnLabel}</button>
+            <div style={{display:"flex",gap:7}}>
+              <div style={{flex:1,background:"rgba(255,255,255,.05)",borderRadius:10,padding:"6px 11px",display:"flex",alignItems:"center",gap:5}}>
+                <span style={{fontSize:18,fontWeight:800,color:C.gold,lineHeight:1}}>{diceSum}</span>
+                <span style={{fontSize:10,color:C.t3}}>→ {t.square} {player.onFastTrack?player.outerPosition||0:player.position}</span>
+              </div>
+              <div style={{background:sqCol+"18",border:`1px solid ${sqCol}33`,borderRadius:10,padding:"6px 9px",display:"flex",alignItems:"center",gap:4,flexShrink:0}}>
+                <span style={{fontSize:12}}>{sq.i}</span>
+                <span style={{fontSize:10,fontWeight:700,color:sqCol}}>{SQLAB[lang][sq.t]}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* TAB BAR */}
+      <div style={{flexShrink:0,background:"#0D0D0D",borderTop:"0.5px solid rgba(255,255,255,.06)",padding:"7px 0 26px",display:"flex"}}>
+        {[[0,"🗺",t.board],[1,"📋",t.sheet],[2,"📜",t.log]].map(([i,icon,label])=>(
+          <button key={i} onClick={()=>{SFX.tab();setTab(i);}} style={{flex:1,background:"none",border:"none",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:2,padding:"5px 0",fontFamily:"-apple-system,sans-serif"}}>
+            <span style={{fontSize:19,opacity:tab===i?1:.35}}>{icon}</span>
+            <span style={{fontSize:9,fontWeight:600,color:tab===i?C.gold:C.t3}}>{label}</span>
+          </button>
+        ))}
+      </div>
+
+      {/* OVERLAYS */}
+      {actionCard&&<ActionModal card={actionCard.card} sqType={actionCard.sqType} player={player} lang={lang} fin={fin} onAction={handleAction} onSkip={handleSkip}/>} 
+      {missedCard&&<MissedModal card={missedCard} lang={lang} onClose={()=>{setMissedCard(null);endTurn();}}/>} 
+      {boldCard&&<BoldMoveModal card={boldCard} lang={lang} onClose={()=>{setBoldCard(null);endTurn();}}/>} 
+      {showFastTrackModal&&<FastTrackModal lang={lang} onClose={()=>{setShowFastTrackModal(false);updP(p=>({...p,onFastTrack:true,outerPosition:0}));endTurn();}}/>} 
+      {victor&&<VictoryScreen player={player} fin={fin} lang={lang} onRestart={onRestart}/>} 
+    </div>
+  );
+}
+
+/* ─── ROOT ────────────────────────────────────────────────── */
+function App() {
+  const [gs,setGs]=useState(null);
+  const start=useCallback((prof,lang)=>{
+    setGs({player:{
+      profession:prof.name[lang],profKey:prof.key,color:prof.color,
+      salary:prof.salary,savings:prof.savings,children:0,childCost:800,
+      expenses:prof.expenses.map(e=>({desc:e.desc,value:e.value})),
+      liabilities:prof.liabilities.map(l=>({...l})),
+      assets:[],passiveIncomes:[],position:0,outerPosition:0,onFastTrack:false,
+      log:[{text:`Jogo iniciado como ${prof.name[lang]}`,color:C.gold}],
+    },lang});
+  },[]);
+  if(!gs)return <Onboarding onStart={start}/>;
+  return <GameScreen key={gs.player.profKey+gs.lang} initPlayer={gs.player} lang={gs.lang} onRestart={()=>setGs(null)}/>;
+}
+
+try {
+  ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  setTimeout(() => { const b=document.getElementById('boot'); if(b) b.style.display='none'; }, 250);
+} catch(e) {
+  const el=document.getElementById('err');
+  el.style.display='block';
+  el.textContent='Erro ao iniciar o jogo:\n'+(e && e.stack ? e.stack : e);
+}
+</script>
+</body>
 </html>
