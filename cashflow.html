@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Cashflow Teste</title>
+<style>
+  :root{--bg:#07111f;--card:#101d33;--line:#243b63;--gold:#f6c453;--green:#27c46b;--red:#ff5b6e;--text:#eef5ff;--muted:#9eb0c9}
+  *{box-sizing:border-box} body{margin:0;font-family:Inter,system-ui,-apple-system,Arial,sans-serif;background:radial-gradient(circle at top,#142b4d 0,#07111f 48%,#040812 100%);color:var(--text)}
+  .wrap{max-width:1180px;margin:auto;padding:22px} .hero{display:flex;justify-content:space-between;gap:16px;align-items:center;margin-bottom:18px}.title{font-size:clamp(26px,5vw,52px);font-weight:900;letter-spacing:-.04em;line-height:.95}.sub{color:var(--muted);margin-top:8px}.badge{background:rgba(246,196,83,.13);border:1px solid rgba(246,196,83,.35);color:var(--gold);padding:10px 14px;border-radius:999px;font-weight:800;white-space:nowrap}.grid{display:grid;grid-template-columns:1.25fr .75fr;gap:16px}.card{background:rgba(16,29,51,.88);border:1px solid rgba(255,255,255,.08);border-radius:22px;padding:18px;box-shadow:0 20px 50px rgba(0,0,0,.25)}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}.stat{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);border-radius:15px;padding:12px}.k{color:var(--muted);font-size:12px}.v{font-size:22px;font-weight:900;margin-top:3px}.green{color:var(--green)}.red{color:var(--red)}.gold{color:var(--gold)}.board{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.cell{min-height:95px;background:linear-gradient(145deg,rgba(255,255,255,.06),rgba(255,255,255,.025));border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:10px;position:relative;overflow:hidden}.cell .n{font-size:11px;color:var(--muted);font-weight:800}.cell .e{font-size:13px;margin-top:8px;font-weight:800}.cell.on{outline:3px solid var(--gold);box-shadow:0 0 0 6px rgba(246,196,83,.12)}.player{position:absolute;right:9px;bottom:8px;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--gold);color:#111;font-weight:900;box-shadow:0 10px 22px rgba(246,196,83,.35)}button{border:0;border-radius:14px;padding:14px 18px;font-weight:900;cursor:pointer;color:#07111f;background:var(--gold);font-size:15px}button.secondary{background:rgba(255,255,255,.08);color:var(--text);border:1px solid rgba(255,255,255,.12)}.actions{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}.dice{font-size:58px;font-weight:900;text-align:center;padding:12px;border-radius:18px;background:rgba(246,196,83,.12);border:1px solid rgba(246,196,83,.24);color:var(--gold)}.log{display:flex;flex-direction:column;gap:9px;max-height:360px;overflow:auto}.log div{padding:10px;border-radius:12px;background:rgba(255,255,255,.05);color:#dbe7ff;font-size:13px;line-height:1.35}.assets{display:grid;gap:8px;margin-top:12px}.asset{display:flex;justify-content:space-between;gap:8px;padding:10px;border-radius:12px;background:rgba(39,196,107,.08);border:1px solid rgba(39,196,107,.16);font-size:13px}.win{display:none;margin-top:14px;padding:14px;border-radius:16px;background:rgba(39,196,107,.15);border:1px solid rgba(39,196,107,.35);font-weight:900;color:#b9ffd5}@media(max-width:850px){.grid{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}.board{grid-template-columns:repeat(3,1fr)}.hero{align-items:flex-start;flex-direction:column}.cell{min-height:86px}.wrap{padding:14px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hero"><div><div class="title">Cashflow<br><span class="gold">Teste MVP</span></div><div class="sub">Protótipo jogável inspirado em educação financeira: compre ativos, controle dívidas e vença quando a renda passiva pagar suas despesas.</div></div><div class="badge">🎲 versão de teste</div></div>
+  <div class="grid">
+    <section class="card">
+      <div class="stats">
+        <div class="stat"><div class="k">Saldo</div><div id="cash" class="v green"></div></div>
+        <div class="stat"><div class="k">Renda passiva</div><div id="passive" class="v gold"></div></div>
+        <div class="stat"><div class="k">Despesas</div><div id="expenses" class="v red"></div></div>
+        <div class="stat"><div class="k">Dívida</div><div id="debt" class="v"></div></div>
+      </div>
+      <div id="board" class="board"></div>
+      <div class="actions"><button onclick="roll()">🎲 Rolar dado</button><button class="secondary" onclick="monthClose()">📆 Fechar mês</button><button class="secondary" onclick="resetGame()">↻ Reiniciar</button></div>
+      <div id="win" class="win">🏆 Vitória! Sua renda passiva já cobre suas despesas. Você saiu da corrida dos ratos.</div>
+    </section>
+    <aside class="card">
+      <div class="dice" id="dice">–</div>
+      <div class="assets" id="assets"></div>
+      <h3>Histórico</h3><div class="log" id="log"></div>
+    </aside>
+  </div>
+</div>
+<script>
+const cells=[['Salário','Receba sua renda ativa'],['Despesa','Imprevisto familiar'],['Mercado','Oportunidade pequena'],['Caridade','Doe e receba sorte'],['Despesa','Manutenção do carro'],['Negócio','Máquina de vendas'],['Mercado','Produto em promoção'],['Salário','Cliente pagou'],['Despesa','Conta atrasada'],['Ativo','Aluguel digital'],['Mercado','Compra de estoque'],['Fechamento','Fim do mês']];
+let st;function money(n){return n.toLocaleString('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:0})}
+function resetGame(){st={pos:0,cash:3500,passive:0,expenses:2200,debt:12000,dice:'–',assets:[],log:['Bem-vindo ao Cashflow Teste. Role o dado para começar.']};save();render()}
+function save(){localStorage.setItem('cashflow-standalone',JSON.stringify(st))}
+function load(){try{st=JSON.parse(localStorage.getItem('cashflow-standalone'))}catch(e){} if(!st)resetGame(); else render()}
+function render(){cash.textContent=money(st.cash);passive.textContent=money(st.passive);expenses.textContent=money(st.expenses);debt.textContent=money(st.debt);dice.textContent=st.dice;board.innerHTML=cells.map((c,i)=>`<div class="cell ${i===st.pos?'on':''}"><div class="n">CASA ${i+1}</div><div class="e">${icon(c[0])} ${c[0]}</div><div class="k">${c[1]}</div>${i===st.pos?'<div class="player">M</div>':''}</div>`).join('');assets.innerHTML='<b>Ativos comprados</b>'+ (st.assets.length?st.assets.map(a=>`<div class="asset"><span>${a.name}</span><b>+${money(a.income)}/mês</b></div>`).join(''):'<div class="k">Nenhum ativo ainda.</div>');log.innerHTML=st.log.slice(-14).reverse().map(x=>`<div>${x}</div>`).join('');win.style.display=st.passive>=st.expenses?'block':'none';save()}
+function icon(t){return {Salário:'💰',Despesa:'⚠️',Mercado:'📈',Caridade:'🤝',Negócio:'🏪',Ativo:'🏠',Fechamento:'📆'}[t]||'🎯'}
+function add(x){st.log.push(x);render()}
+function roll(){let d=Math.ceil(Math.random()*6);st.dice=d;st.pos=(st.pos+d)%cells.length;eventCell(cells[st.pos][0]);render()}
+function eventCell(t){if(t==='Salário'){st.cash+=3000;add('💰 Salário recebido: +'+money(3000));}else if(t==='Despesa'){let v=[450,700,950][Math.floor(Math.random()*3)];st.cash-=v;st.expenses+=50;add('⚠️ Despesa inesperada: -'+money(v)+' e despesas mensais subiram.');}else if(t==='Caridade'){st.cash-=200;st.passive+=50;add('🤝 Caridade: -R$200 agora, +R$50 de renda passiva por networking.');}else if(t==='Negócio'||t==='Ativo'||t==='Mercado'){offer();}else if(t==='Fechamento'){monthClose();}}
+function offer(){let options=[['Micro loja online',1200,180],['Estoque de moda',1800,260],['Máquina de venda',2500,340],['Quarto para aluguel',3200,420],['Página com afiliados',900,120]];let a=options[Math.floor(Math.random()*options.length)];if(st.cash>=a[1]){st.cash-=a[1];st.passive+=a[2];st.assets.push({name:a[0],income:a[2]});add('📈 Você comprou '+a[0]+' por '+money(a[1])+'. Renda passiva: +'+money(a[2])+'/mês.')}else{add('📈 Oportunidade apareceu: '+a[0]+' custava '+money(a[1])+', mas faltou caixa.')}}
+function monthClose(){st.cash+=st.passive;st.cash-=st.expenses;let amort=Math.min(500,st.debt);st.debt-=amort;st.cash-=amort;add('📆 Fechamento do mês: renda passiva '+money(st.passive)+', despesas '+money(st.expenses)+', dívida amortizada '+money(amort)+'.')}
+load();
+</script>
+</body>
+</html>
