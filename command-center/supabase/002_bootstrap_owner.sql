@@ -1,28 +1,45 @@
--- Execute após criar o usuário Maurício em Authentication > Users.
--- Substitua o UUID abaixo pelo id real de auth.users.
+-- Vincula Maurício Ramos como proprietário do Grupo Maurício.
+-- Execute após criar o usuário em Authentication > Users.
 
 begin;
 
-insert into public.profiles (id, full_name, email, locale, timezone)
+insert into public.profiles (
+  id,
+  full_name
+)
 values (
-  '00000000-0000-0000-0000-000000000000',
-  'Maurício Ramos',
-  'agencianextlevelbr@gmail.com',
-  'pt-BR',
-  'America/Sao_Paulo'
+  'deed643c-29cb-4d60-bd10-053dd53a14f7',
+  'Maurício Ramos'
 )
 on conflict (id) do update set
   full_name = excluded.full_name,
-  email = excluded.email,
-  locale = excluded.locale,
-  timezone = excluded.timezone;
+  updated_at = now();
 
-insert into public.organization_members (organization_id, user_id, role, status)
-select id, '00000000-0000-0000-0000-000000000000', 'owner', 'active'
+insert into public.organization_members (
+  organization_id,
+  profile_id,
+  role,
+  is_active
+)
+select
+  id,
+  'deed643c-29cb-4d60-bd10-053dd53a14f7',
+  'owner',
+  true
 from public.organizations
 where slug = 'grupo-mauricio'
-on conflict (organization_id, user_id) do update set
+on conflict (organization_id, profile_id) do update set
   role = 'owner',
-  status = 'active';
+  is_active = true;
 
 commit;
+
+select
+  p.full_name,
+  om.role,
+  om.is_active,
+  o.name as organization
+from public.organization_members om
+join public.profiles p on p.id = om.profile_id
+join public.organizations o on o.id = om.organization_id
+where p.id = 'deed643c-29cb-4d60-bd10-053dd53a14f7';
