@@ -1,0 +1,41 @@
+{
+  "platform": {
+    "name": "Command Center OS",
+    "version": "0.1.0",
+    "architecture": "multi-organization"
+  },
+  "organization": {
+    "id": "grupo-mauricio",
+    "name": "Grupo Maurício",
+    "shortName": "GM",
+    "locale": "pt-BR",
+    "currency": "BRL",
+    "primaryUser": {
+      "name": "Maurício Ramos",
+      "role": "CEO"
+    },
+    "companies": [
+      {
+        "id": "nextlevel",
+        "name": "NextLevel",
+        "areas": ["Marketing", "Tecnologia", "Inteligência Artificial", "Crescimento"]
+      },
+      {
+        "id": "mega-tron",
+        "name": "Mega Tron",
+        "areas": ["Comércio Eletrônico", "Operação", "Marketplace"]
+      },
+      {
+        "id": "mauricio-turismo",
+        "name": "Maurício Turismo",
+        "legalName": "Starline Viagens e Turismo Ltda.",
+        "areas": ["Eventos", "Missões Empresariais", "Turismo"]
+      },
+      {
+        "id": "idesa-mrs",
+        "name": "IDESA-MRS",
+        "areas": ["Educação", "Impacto Social", "Projetos Institucionais"]
+      }
+    ]
+  }
+}
