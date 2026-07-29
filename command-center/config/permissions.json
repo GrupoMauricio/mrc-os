@@ -1,0 +1,9 @@
+{
+  "roles": {
+    "ceo": {"label":"CEO","access":"full"},
+    "manager": {"label":"Gestor","access":"managed-contexts"},
+    "collaborator": {"label":"Colaborador","access":"assigned-work"},
+    "partner": {"label":"Parceiro","access":"shared-projects"},
+    "investor": {"label":"Investidor","access":"authorized-read-only"}
+  }
+}

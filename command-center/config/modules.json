@@ -1,0 +1,11 @@
+{
+  "modules": [
+    {"id":"dashboard","name":"Dashboard Executivo","enabled":true},
+    {"id":"capital","name":"Capital Center","enabled":true},
+    {"id":"projects","name":"Project Center","enabled":true},
+    {"id":"people","name":"People Center","enabled":true},
+    {"id":"knowledge","name":"Knowledge Center","enabled":true},
+    {"id":"venture","name":"Venture Lab","enabled":true},
+    {"id":"investor","name":"Investor Portal","enabled":true}
+  ]
+}
