@@ -13,8 +13,9 @@ Nunca publique a service_role key no frontend.
 
 No SQL Editor, execute na ordem:
 
-1. `supabase/001_initial_schema.sql`
-2. `supabase/002_bootstrap_owner.sql` somente após criar o usuário
+1. `supabase/schema.sql`
+2. `supabase/seed.sql`
+3. `supabase/002_bootstrap_owner.sql` somente após criar o usuário
 
 ## 3. Criar o usuário proprietário
 
