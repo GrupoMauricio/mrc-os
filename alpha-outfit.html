@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Programa de Embaixadores Alpha Outfit: plataforma, estoque, treinamento e suporte para vendedores de camisas tailandesas 1.1 escalarem sua operação." />
+  <title>Alpha Outfit — Programa de Embaixadores</title>
+  <preconnect href="https://fonts.googleapis.com" />
+  <preconnect href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    * { margin: 0; }
+
+    :root {
+      color-scheme: dark;
+      --black: #050505;
+      --obsidian: #0a0a0b;
+      --panel: rgba(18, 18, 18, .82);
+      --panel-strong: rgba(25, 22, 16, .92);
+      --line: rgba(255, 255, 255, .09);
+      --line-gold: rgba(225, 189, 92, .32);
+      --gold: #c9a84c;
+      --gold-2: #f5d77e;
+      --gold-3: #8f6e22;
+      --ivory: #f7f3e8;
+      --muted: rgba(247, 243, 232, .68);
+      --soft: rgba(247, 243, 232, .44);
+      --danger: #ff3148;
+      --green: #2ee87d;
+      --shadow: 0 30px 90px rgba(0, 0, 0, .55);
+      --radius: 24px;
+      --max: 1160px;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      min-height: 100vh;
+      overflow-x: hidden;
+      background:
+        radial-gradient(circle at 50% -8%, rgba(245, 215, 126, .16), transparent 34rem),
+        radial-gradient(circle at 8% 14%, rgba(201, 168, 76, .09), transparent 26rem),
+        linear-gradient(180deg, #090806 0%, var(--black) 44%, #090806 100%);
+      color: var(--ivory);
+      font-family: Barlow, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.6;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      background-image:
+        linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+      background-size: 72px 72px;
+      mask-image: linear-gradient(to bottom, black, transparent 78%);
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 999;
+      pointer-events: none;
+      opacity: .19;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.45'/%3E%3C/svg%3E");
+      mix-blend-mode: overlay;
+    }
+
+    a { color: inherit; }
+    strong { color: var(--ivory); font-weight: 700; }
+    .container { width: min(var(--max), calc(100% - 40px)); margin-inline: auto; }
+
+    .topbar {
+      position: relative;
+      z-index: 20;
+      display: flex;
+      justify-content: center;
+      padding: 10px 18px;
+      background: linear-gradient(90deg, #5d0712, var(--danger), #5d0712);
+      color: white;
+      font: 800 13px/1.2 "Barlow Condensed", sans-serif;
+      letter-spacing: .16em;
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      border-bottom: 1px solid var(--line);
+      background: rgba(5, 5, 5, .72);
+      backdrop-filter: blur(18px);
+    }
+
+    .nav__inner {
+      height: 74px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .brand { text-decoration: none; line-height: 1; }
+    .brand__name {
+      display: block;
+      font-family: "Bebas Neue", sans-serif;
+      font-size: clamp(32px, 4vw, 44px);
+      letter-spacing: .16em;
+      background: linear-gradient(115deg, #fff0b3, var(--gold), var(--gold-3));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .brand__tag {
+      display: block;
+      color: var(--soft);
+      font: 700 10px/1 "Barlow Condensed", sans-serif;
+      letter-spacing: .38em;
+      text-transform: uppercase;
+    }
+
+    .nav__links { display: flex; align-items: center; gap: 22px; }
+    .nav__links a {
+      color: var(--muted);
+      font: 700 12px/1 "Barlow Condensed", sans-serif;
+      letter-spacing: .15em;
+      text-decoration: none;
+      text-transform: uppercase;
+      transition: color .2s ease;
+    }
+    .nav__links a:hover { color: var(--gold-2); }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      min-height: 54px;
+      padding: 16px 26px;
+      border: 1px solid transparent;
+      border-radius: 999px;
+      font: 800 16px/1 "Barlow Condensed", sans-serif;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      text-decoration: none;
+      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease, background .18s ease;
+      will-change: transform;
+    }
+    .btn:hover { transform: translateY(-2px); }
+    .btn--gold {
+      color: #090704;
+      background: linear-gradient(135deg, #fff0a8, var(--gold), var(--gold-3));
+      box-shadow: 0 18px 45px rgba(201, 168, 76, .26);
+    }
+    .btn--ghost {
+      color: var(--gold-2);
+      border-color: var(--line-gold);
+      background: rgba(201, 168, 76, .055);
+    }
+    .btn--green {
+      color: #031108;
+      background: linear-gradient(135deg, #8cffbd, var(--green), #16a34a);
+      box-shadow: 0 18px 45px rgba(46, 232, 125, .18);
+    }
+
+    .hero {
+      position: relative;
+      padding: 78px 0 54px;
+      isolation: isolate;
+    }
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 2rem 0 auto 50%;
+      width: min(860px, 92vw);
+      height: 520px;
+      z-index: -1;
+      transform: translateX(-50%);
+      background: radial-gradient(circle, rgba(245, 215, 126, .18), transparent 67%);
+      filter: blur(5px);
+    }
+    .hero__grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(340px, .95fr);
+      align-items: center;
+      gap: clamp(34px, 6vw, 76px);
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 22px;
+      padding: 8px 14px;
+      border: 1px solid var(--line-gold);
+      border-radius: 999px;
+      color: var(--gold-2);
+      background: rgba(201, 168, 76, .055);
+      font: 800 12px/1 "Barlow Condensed", sans-serif;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+    }
+    .eyebrow::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--danger);
+      box-shadow: 0 0 0 6px rgba(255, 49, 72, .12);
+    }
+
+    h1, h2, h3 { font-family: "Bebas Neue", sans-serif; font-weight: 400; line-height: .92; text-transform: uppercase; }
+    .hero h1 {
+      max-width: 760px;
+      font-size: clamp(58px, 9.3vw, 124px);
+      letter-spacing: .01em;
+    }
+    .text-gold {
+      background: linear-gradient(135deg, #fff0b3 0%, var(--gold-2) 32%, var(--gold) 58%, var(--gold-3) 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .hero__lead {
+      max-width: 620px;
+      margin: 24px 0 30px;
+      color: var(--muted);
+      font-size: clamp(17px, 1.65vw, 21px);
+    }
+    .hero__actions { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 34px; }
+    .hero__proof {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      max-width: 680px;
+      gap: 10px;
+    }
+    .proof-card {
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, .035);
+    }
+    .proof-card b {
+      display: block;
+      color: var(--gold-2);
+      font-family: "Bebas Neue", sans-serif;
+      font-size: 30px;
+      line-height: 1;
+    }
+    .proof-card span { color: var(--soft); font-size: 13px; }
+
+    .hero-card {
+      position: relative;
+      padding: 24px;
+      border: 1px solid var(--line-gold);
+      border-radius: var(--radius);
+      background:
+        linear-gradient(145deg, rgba(255,255,255,.08), transparent 28%),
+        linear-gradient(180deg, rgba(23, 20, 14, .94), rgba(9, 9, 9, .88));
+      box-shadow: var(--shadow), 0 0 80px rgba(201, 168, 76, .11);
+      overflow: hidden;
+    }
+    .hero-card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      pointer-events: none;
+      background: linear-gradient(120deg, transparent 15%, rgba(255,255,255,.08), transparent 38%);
+      transform: translateX(-60%);
+      animation: sheen 6s ease-in-out infinite;
+    }
+    @keyframes sheen { 50%, 100% { transform: translateX(100%); } }
+
+    .video-shell {
+      position: relative;
+      border-radius: 20px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.12);
+      background: #000;
+      aspect-ratio: 16 / 9;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.04);
+    }
+    .video-shell iframe, .video-poster {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+    .video-poster {
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      color: white;
+      background:
+        linear-gradient(180deg, rgba(0,0,0,.08), rgba(0,0,0,.76)),
+        url("https://i.ytimg.com/vi/07vUeUIGLfs/maxresdefault.jpg") center/cover;
+    }
+    .play {
+      display: grid;
+      place-items: center;
+      width: 86px;
+      height: 86px;
+      border-radius: 50%;
+      padding-left: 5px;
+      color: #0a0803;
+      background: linear-gradient(135deg, #fff1a9, var(--gold), var(--gold-3));
+      box-shadow: 0 18px 60px rgba(201, 168, 76, .34);
+      font-size: 30px;
+    }
+    .video-note {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-top: 18px;
+      color: var(--soft);
+      font-size: 13px;
+    }
+    .video-note a { color: var(--gold-2); text-decoration: none; font-weight: 700; }
+
+    .section { padding: 72px 0; }
+    .section__head { max-width: 760px; margin: 0 auto 38px; text-align: center; }
+    .section__label {
+      margin-bottom: 16px;
+      color: var(--gold-2);
+      font: 800 12px/1 "Barlow Condensed", sans-serif;
+      letter-spacing: .27em;
+      text-transform: uppercase;
+    }
+    .section h2 { font-size: clamp(44px, 6vw, 76px); }
+    .section__desc { margin-top: 14px; color: var(--muted); font-size: 17px; }
+
+    .story-card {
+      display: grid;
+      grid-template-columns: .82fr 1.18fr;
+      gap: 0;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: rgba(255, 255, 255, .035);
+      box-shadow: var(--shadow);
+    }
+    .story-card__quote {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 430px;
+      padding: 34px;
+      background:
+        radial-gradient(circle at 30% 0%, rgba(245, 215, 126, .17), transparent 55%),
+        linear-gradient(145deg, rgba(56, 39, 8, .88), rgba(11, 11, 11, .98));
+    }
+    .story-card__quote p {
+      font-family: "Barlow Condensed", sans-serif;
+      font-size: clamp(30px, 3.8vw, 48px);
+      font-weight: 800;
+      line-height: 1.02;
+      text-transform: uppercase;
+    }
+    .story-card__quote span { color: var(--gold-2); }
+    .story-card__body { padding: clamp(28px, 4vw, 46px); color: var(--muted); font-size: 18px; }
+    .story-card__body p + p { margin-top: 20px; }
+
+    .grid { display: grid; gap: 18px; }
+    .grid--features { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .feature {
+      position: relative;
+      min-height: 250px;
+      padding: 26px;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.022));
+      overflow: hidden;
+      transition: transform .22s ease, border-color .22s ease, background .22s ease;
+    }
+    .feature:hover { transform: translateY(-5px); border-color: var(--line-gold); background: rgba(201,168,76,.045); }
+    .feature__icon {
+      width: 48px;
+      height: 48px;
+      display: grid;
+      place-items: center;
+      margin-bottom: 18px;
+      border: 1px solid var(--line-gold);
+      border-radius: 16px;
+      background: rgba(201,168,76,.08);
+      font-size: 23px;
+    }
+    .feature h3 { margin-bottom: 10px; font-family: "Barlow Condensed", sans-serif; font-size: 24px; line-height: 1.12; }
+    .feature p { color: var(--soft); font-size: 15px; }
+
+    .plans-wrap {
+      padding: clamp(22px, 4vw, 36px);
+      border: 1px solid var(--line-gold);
+      border-radius: 32px;
+      background:
+        radial-gradient(circle at 50% 0%, rgba(245, 215, 126, .13), transparent 42%),
+        rgba(255,255,255,.032);
+      box-shadow: var(--shadow);
+    }
+    .plans-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; align-items: stretch; }
+    .plan {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid var(--line);
+      border-radius: 26px;
+      background: linear-gradient(180deg, rgba(14,14,14,.96), rgba(9,9,9,.96));
+      overflow: hidden;
+    }
+    .plan--featured { border-color: rgba(245, 215, 126, .7); box-shadow: 0 0 70px rgba(201,168,76,.13); }
+    .plan__badge {
+      padding: 10px 18px;
+      color: #090704;
+      background: linear-gradient(90deg, var(--gold-3), var(--gold-2), var(--gold));
+      font: 900 12px/1 "Barlow Condensed", sans-serif;
+      letter-spacing: .24em;
+      text-align: center;
+      text-transform: uppercase;
+    }
+    .plan__body { display: flex; flex: 1; flex-direction: column; padding: 30px; }
+    .plan h3 { font-size: 48px; }
+    .plan__tagline { margin: 6px 0 24px; color: var(--soft); }
+    .price-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 16px 0;
+      border-top: 1px solid var(--line);
+    }
+    .price-row:last-of-type { border-bottom: 1px solid var(--line); }
+    .price-row span { color: var(--soft); font: 800 13px/1 "Barlow Condensed", sans-serif; letter-spacing: .18em; text-transform: uppercase; }
+    .price-row b { color: var(--gold-2); font-family: "Bebas Neue", sans-serif; font-size: 34px; line-height: .86; text-align: right; }
+    .price-row small { display: block; color: var(--soft); font: 600 12px/1.2 Barlow, sans-serif; }
+    .economy {
+      margin: 14px 0 22px;
+      padding: 10px 12px;
+      border: 1px solid rgba(46,232,125,.22);
+      border-radius: 14px;
+      color: var(--green);
+      background: rgba(46,232,125,.08);
+      font-size: 13px;
+      font-weight: 800;
+      text-align: center;
+    }
+    .plan ul { display: grid; gap: 12px; margin: 0 0 26px; padding: 0; list-style: none; }
+    .plan li { display: flex; gap: 10px; color: var(--muted); font-size: 15px; }
+    .plan li::before { content: "✦"; color: var(--gold-2); flex: 0 0 auto; }
+    .plan .btn { margin-top: auto; width: 100%; }
+
+    .urgency {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 26px;
+      padding: 30px;
+      border: 1px solid rgba(255,49,72,.32);
+      border-radius: 26px;
+      background:
+        radial-gradient(circle at 0% 0%, rgba(255,49,72,.13), transparent 42%),
+        linear-gradient(135deg, rgba(49, 5, 10, .82), rgba(8,8,8,.95));
+    }
+    .urgency h2 { color: #ff5b6b; font-size: clamp(38px, 5vw, 66px); }
+    .urgency p { color: var(--muted); font-size: 17px; }
+
+    .agency {
+      display: grid;
+      grid-template-columns: .9fr 1.1fr;
+      gap: 26px;
+      align-items: center;
+      padding: clamp(26px, 4vw, 42px);
+      border: 1px solid rgba(46,232,125,.25);
+      border-radius: 28px;
+      background:
+        radial-gradient(circle at 100% 0%, rgba(46,232,125,.12), transparent 38%),
+        linear-gradient(145deg, rgba(5, 33, 16, .58), rgba(10, 10, 10, .95));
+      box-shadow: var(--shadow);
+    }
+    .agency__mark {
+      display: grid;
+      place-items: center;
+      min-height: 250px;
+      border: 1px solid rgba(46,232,125,.18);
+      border-radius: 24px;
+      background: rgba(46,232,125,.055);
+      color: var(--green);
+      font-family: "Bebas Neue", sans-serif;
+      font-size: clamp(48px, 7vw, 78px);
+      line-height: .9;
+      text-align: center;
+    }
+    .agency p { margin: 16px 0 22px; color: var(--muted); font-size: 17px; }
+
+    .faq-list { max-width: 860px; margin: 0 auto; display: grid; gap: 12px; }
+    details {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(255,255,255,.035);
+      overflow: hidden;
+    }
+    summary {
+      cursor: pointer;
+      padding: 20px 22px;
+      font: 800 20px/1.15 "Barlow Condensed", sans-serif;
+      list-style: none;
+    }
+    summary::-webkit-details-marker { display: none; }
+    summary::after { content: "+"; float: right; color: var(--gold-2); }
+    details[open] summary::after { content: "–"; }
+    details p { padding: 0 22px 22px; color: var(--muted); }
+
+    .final-cta {
+      position: relative;
+      padding: 80px 0 96px;
+      text-align: center;
+      overflow: hidden;
+    }
+    .final-cta::before {
+      content: "";
+      position: absolute;
+      inset: 50% auto auto 50%;
+      width: min(760px, 92vw);
+      height: 520px;
+      transform: translate(-50%, -50%);
+      z-index: -1;
+      background: radial-gradient(circle, rgba(245,215,126,.16), transparent 68%);
+    }
+    .final-cta h2 { font-size: clamp(54px, 8vw, 100px); }
+    .final-cta p { max-width: 560px; margin: 18px auto 30px; color: var(--muted); font-size: 18px; }
+
+    .footer {
+      padding: 28px 0 96px;
+      border-top: 1px solid var(--line);
+      color: var(--soft);
+      text-align: center;
+      font-size: 13px;
+    }
+
+    .mobile-sticky {
+      position: fixed;
+      inset: auto 14px 14px;
+      z-index: 50;
+      display: none;
+    }
+    .mobile-sticky .btn { width: 100%; box-shadow: 0 16px 42px rgba(201,168,76,.35); }
+
+    .reveal { opacity: 0; transform: translateY(22px); transition: opacity .6s ease, transform .6s ease; }
+    .reveal.is-visible { opacity: 1; transform: translateY(0); }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; }
+    }
+
+    @media (max-width: 980px) {
+      .nav__links { display: none; }
+      .hero { padding-top: 52px; }
+      .hero__grid, .story-card, .agency { grid-template-columns: 1fr; }
+      .hero-card { order: -1; }
+      .grid--features { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .story-card__quote { min-height: 280px; }
+    }
+
+    @media (max-width: 720px) {
+      .container { width: min(100% - 28px, var(--max)); }
+      .topbar { font-size: 11px; letter-spacing: .11em; }
+      .nav__inner { height: 66px; }
+      .brand__name { font-size: 32px; }
+      .hero h1 { font-size: clamp(48px, 17vw, 74px); }
+      .hero__proof, .grid--features, .plans-grid, .urgency { grid-template-columns: 1fr; }
+      .proof-card { padding: 14px; }
+      .section { padding: 54px 0; }
+      .plan__body, .story-card__body, .story-card__quote { padding: 24px; }
+      .video-note { align-items: flex-start; flex-direction: column; }
+      .nav .btn { display: none; }
+      .mobile-sticky { display: block; }
+      .footer { padding-bottom: 112px; }
+      .btn { min-height: 52px; padding: 15px 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">🔴 Vagas limitadas por região — consulte disponibilidade antes de entrar</div>
+
+  <header class="nav">
+    <div class="container nav__inner">
+      <a class="brand" href="#topo" aria-label="Alpha Outfit">
+        <span class="brand__name">Alpha Outfit</span>
+        <span class="brand__tag">Sistema Oficial de Embaixadores</span>
+      </a>
+      <nav class="nav__links" aria-label="Navegação principal">
+        <a href="#historia">História</a>
+        <a href="#beneficios">Benefícios</a>
+        <a href="#planos">Planos</a>
+        <a href="#faq">Dúvidas</a>
+      </nav>
+      <a class="btn btn--gold" href="https://wa.me/5511938003595?text=Ol%C3%A1!%20Quero%20saber%20se%20minha%20regi%C3%A3o%20ainda%20tem%20vaga%20no%20Alpha%20Outfit." target="_blank" rel="noopener">Verificar região</a>
+    </div>
+  </header>
+
+  <main id="topo">
+    <section class="hero">
+      <div class="container hero__grid">
+        <div class="hero__copy reveal">
+          <div class="eyebrow">Programa de Embaixadores · Seleção regional</div>
+          <h1>Venda como operação séria. <span class="text-gold">Domine sua região.</span></h1>
+          <p class="hero__lead">Uma estrutura premium para quem já vende camisa tailandesa 1.1 e quer transformar indicação, grupos e pedidos manuais em uma operação digital com plataforma, estoque, treinamento e suporte.</p>
+          <div class="hero__actions">
+            <a class="btn btn--gold" href="#planos">Conhecer os planos</a>
+            <a class="btn btn--ghost" href="https://wa.me/5511938003595?text=Ol%C3%A1!%20Quero%20entender%20o%20Programa%20de%20Embaixadores%20Alpha%20Outfit." target="_blank" rel="noopener">Falar no WhatsApp</a>
+          </div>
+          <div class="hero__proof" aria-label="Destaques do programa">
+            <div class="proof-card"><b>8 aulas</b><span>início rápido para colocar a operação em rota</span></div>
+            <div class="proof-card"><b>VIP</b><span>suporte e apoio técnico para membros Alpha</span></div>
+            <div class="proof-card"><b>Região</b><span>disponibilidade analisada antes da entrada</span></div>
+          </div>
+        </div>
+
+        <aside class="hero-card reveal" aria-label="Vídeo de apresentação">
+          <div class="video-shell" data-youtube-id="07vUeUIGLfs">
+            <button class="video-poster" type="button" aria-label="Assistir vídeo de apresentação">
+              <span class="play" aria-hidden="true">▶</span>
+            </button>
+          </div>
+          <div class="video-note">
+            <span>Vídeo de apresentação · cerca de 50 minutos</span>
+            <a href="https://www.youtube.com/watch?v=07vUeUIGLfs" target="_blank" rel="noopener">Abrir direto no YouTube</a>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section" id="historia">
+      <div class="container story-card reveal">
+        <div class="story-card__quote">
+          <p>“Eu sabia que eu conseguia mais. Vim pro Brás — <span>sem manual, sem padrinho.</span>”</p>
+          <div class="section__label">A história por trás do sistema</div>
+        </div>
+        <div class="story-card__body">
+          <p>Eu cresci na periferia de Alagoas. Até os 16 anos, trabalhei em lavajato ganhando <strong>R$20 por dia</strong>. Acordava cedo, trabalhava o dia inteiro e voltava pra casa com quase nada no bolso.</p>
+          <p>Aprendi o mercado de camisas tailandesas na prática e fui construindo minha operação do zero. Quando cheguei em um nível que nunca imaginei, pensei: <strong>quantas pessoas têm a mesma vontade e só precisam de estrutura?</strong></p>
+          <p>Foi assim que nasceu o Alpha Outfit: a estrutura que eu não tive no começo — agora organizada para quem quer vender com posicionamento, tecnologia e operação.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="beneficios">
+      <div class="container">
+        <div class="section__head reveal">
+          <div class="section__label">O que você recebe</div>
+          <h2>Tudo para operar com <span class="text-gold">cara de marca grande</span></h2>
+          <p class="section__desc">A página antiga repetia blocos, tinha muitos estilos soltos e pouco acabamento visual. Esta versão organiza a proposta, dá foco ao vídeo, aumenta percepção de valor e cria CTAs mais claros.</p>
+        </div>
+        <div class="grid grid--features">
+          <article class="feature reveal">
+            <div class="feature__icon">🌐</div>
+            <h3>Plataforma pronta para vender</h3>
+            <p>Você sai do improviso e passa a operar com uma vitrine digital profissional, feita para organizar pedidos e aumentar confiança.</p>
+          </article>
+          <article class="feature reveal">
+            <div class="feature__icon">📦</div>
+            <h3>Estoque abastecido</h3>
+            <p>Camisas tailandesas 1.1 com reposição estruturada para você focar em vender, atender e crescer a carteira de clientes.</p>
+          </article>
+          <article class="feature reveal">
+            <div class="feature__icon">🏆</div>
+            <h3>Proteção regional</h3>
+            <p>Antes da entrada, a disponibilidade da sua região é verificada para preservar o posicionamento dos embaixadores.</p>
+          </article>
+          <article class="feature reveal">
+            <div class="feature__icon">🎓</div>
+            <h3>Curso de Início Rápido</h3>
+            <p>Oito aulas diretas para entender oferta, operação, atendimento e primeiros movimentos comerciais.</p>
+          </article>
+          <article class="feature reveal">
+            <div class="feature__icon">🚀</div>
+            <h3>NextLevel Marketing</h3>
+            <p>Suporte técnico e soluções de marketing disponíveis para membros que querem profissionalizar a aquisição de clientes.</p>
+          </article>
+          <article class="feature reveal">
+            <div class="feature__icon">💎</div>
+            <h3>Sua marca no mercado</h3>
+            <p>Você não parece apenas “mais um revendedor”: a experiência visual posiciona sua operação com mais valor percebido.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="planos">
+      <div class="container">
+        <div class="section__head reveal">
+          <div class="section__label">Escolha seu plano</div>
+          <h2>Invista no seu <span class="text-gold">negócio</span></h2>
+          <p class="section__desc">Dois caminhos claros: começar com estrutura ou entrar com mais margem e suporte prioritário.</p>
+        </div>
+        <div class="plans-wrap reveal">
+          <div class="plans-grid">
+            <article class="plan">
+              <div class="plan__body">
+                <h3>Embaixador</h3>
+                <p class="plan__tagline">Para começar a digitalizar agora.</p>
+                <div class="price-row"><span>Mensal</span><b>R$400<small>/mês</small></b></div>
+                <div class="price-row"><span>Anual</span><b>R$2.000<small>/ano</small></b></div>
+                <div class="economy">Economia de R$2.800 no plano anual</div>
+                <ul>
+                  <li>Plataforma própria configurada</li>
+                  <li>Acesso ao estoque completo</li>
+                  <li>Disponibilidade regional consultada</li>
+                  <li>Curso de Início Rápido com 8 aulas</li>
+                  <li>Suporte da equipe Alpha</li>
+                  <li>Apoio da NextLevel Marketing</li>
+                </ul>
+                <a class="btn btn--ghost" href="https://wa.me/5511938003595?text=Ol%C3%A1!%20Tenho%20interesse%20no%20Plano%20Embaixador%20do%20Alpha%20Outfit." target="_blank" rel="noopener">Quero esse plano</a>
+              </div>
+            </article>
+
+            <article class="plan plan--featured">
+              <div class="plan__badge">Mais vantajoso</div>
+              <div class="plan__body">
+                <h3>Sócio</h3>
+                <p class="plan__tagline">Para buscar mais margem e prioridade.</p>
+                <div class="price-row"><span>Mensal</span><b>R$500<small>/mês</small></b></div>
+                <div class="price-row"><span>Anual</span><b>R$3.000<small>/ano</small></b></div>
+                <div class="economy">Economia de R$3.000 no plano anual</div>
+                <ul>
+                  <li>Tudo do plano Embaixador</li>
+                  <li>Acesso a preço de importação para maior margem</li>
+                  <li>Curso de Início Rápido com 8 aulas</li>
+                  <li>Suporte VIP com prioridade máxima</li>
+                  <li>Acesso prioritário a novos produtos</li>
+                  <li>NextLevel Marketing para escala e campanhas</li>
+                </ul>
+                <a class="btn btn--gold" href="https://wa.me/5511938003595?text=Ol%C3%A1!%20Tenho%20interesse%20no%20Plano%20S%C3%B3cio%20do%20Alpha%20Outfit." target="_blank" rel="noopener">Quero ser sócio</a>
+              </div>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container urgency reveal">
+        <div>
+          <div class="section__label">Atenção</div>
+          <h2>Vagas limitadas por região</h2>
+          <p>Quando a sua região estiver ocupada, novas entradas podem ser bloqueadas. O primeiro passo é consultar disponibilidade pelo WhatsApp.</p>
+        </div>
+        <a class="btn btn--gold" href="https://wa.me/5511938003595?text=Ol%C3%A1!%20Quero%20saber%20se%20minha%20regi%C3%A3o%20ainda%20tem%20vaga%20no%20Alpha%20Outfit." target="_blank" rel="noopener">Consultar agora</a>
+      </div>
+    </section>
+
+    <section class="section" id="nextlevel">
+      <div class="container agency reveal">
+        <div class="agency__mark">NextLevel<br />Marketing</div>
+        <div>
+          <div class="section__label" style="color: var(--green);">Suporte técnico especializado</div>
+          <h2>Uma agência ao lado da sua operação</h2>
+          <p>A NextLevel Marketing fica disponível para orientar membros Alpha em demandas de marketing digital, tráfego pago, posicionamento, branding e melhorias de conversão.</p>
+          <a class="btn btn--green" href="https://wa.me/5511938003595?text=Ol%C3%A1%20Maur%C3%ADcio!%20Quero%20entender%20as%20solu%C3%A7%C3%B5es%20da%20NextLevel%20Marketing%20para%20membros%20Alpha%20Outfit." target="_blank" rel="noopener">Falar com o Maurício</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="faq">
+      <div class="container">
+        <div class="section__head reveal">
+          <div class="section__label">Dúvidas frequentes</div>
+          <h2>Antes de entrar</h2>
+        </div>
+        <div class="faq-list reveal">
+          <details open>
+            <summary>Eu já tenho minha operação. Por que preciso de uma plataforma?</summary>
+            <p>Porque grupo de WhatsApp e indicação funcionam, mas são difíceis de escalar. A plataforma cria vitrine, processo, organização e mais confiança para o cliente comprar.</p>
+          </details>
+          <details>
+            <summary>E se não funcionar na minha cidade?</summary>
+            <p>Se você já vende camisas na sua cidade, o mercado já existe. A plataforma organiza e amplia o alcance do que você já faz hoje.</p>
+          </details>
+          <details>
+            <summary>Como funciona o estoque?</summary>
+            <p>Sua operação fica conectada ao estoque Alpha. O objetivo é reduzir preocupação com reposição e deixar você focado em venda e relacionamento.</p>
+          </details>
+          <details>
+            <summary>Qual a diferença entre Embaixador e Sócio?</summary>
+            <p>O Sócio inclui os benefícios do Embaixador e adiciona preço de importação, maior margem, suporte VIP e prioridade em novos produtos.</p>
+          </details>
+          <details>
+            <summary>O que é a NextLevel Marketing?</summary>
+            <p>É o suporte especializado para membros Alpha em marketing digital, tráfego, branding e melhorias de conversão. O atendimento detalha quais soluções estão disponíveis para seu momento.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <section class="final-cta">
+      <div class="container reveal">
+        <h2>Sua região ainda <span class="text-gold">está disponível?</span></h2>
+        <p>Clique no botão, chame o suporte e confirme antes que a área seja fechada para outro embaixador.</p>
+        <a class="btn btn--gold" href="https://wa.me/5511938003595?text=Ol%C3%A1!%20Quero%20saber%20se%20minha%20regi%C3%A3o%20ainda%20tem%20vaga%20no%20Alpha%20Outfit." target="_blank" rel="noopener">Verificar minha região</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <strong>ALPHA OUTFIT</strong><br />
+      © 2026 Alpha Outfit · Sistema Oficial de Embaixadores
+    </div>
+  </footer>
+
+  <div class="mobile-sticky">
+    <a class="btn btn--gold" href="https://wa.me/5511938003595?text=Ol%C3%A1!%20Quero%20saber%20se%20minha%20regi%C3%A3o%20ainda%20tem%20vaga%20no%20Alpha%20Outfit." target="_blank" rel="noopener">Verificar região</a>
+  </div>
+
+  <script>
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.14 });
+
+    document.querySelectorAll('.reveal').forEach((element) => revealObserver.observe(element));
+
+    document.querySelectorAll('.video-shell').forEach((shell) => {
+      const videoId = shell.dataset.youtubeId;
+      const poster = shell.querySelector('.video-poster');
+
+      poster.addEventListener('click', () => {
+        const iframe = document.createElement('iframe');
+        iframe.src = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1`;
+        iframe.title = 'De 20 reais por dia no lavajato a dono de operação — Alpha Outfit';
+        iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+        iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+        iframe.allowFullscreen = true;
+        shell.replaceChildren(iframe);
+      });
+    });
+  </script>
+</body>
+</html>
